@@ -1,0 +1,132 @@
+from fastapi import HTTPException, status
+from models.quiz.model import Quiz
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .schemas import (
+    QuizCreateRequest,
+    QuizListRequest,
+    QuizListResponse,
+)
+
+
+class QuizRepository:
+    async def create_quiz(
+        self, session: AsyncSession, data: QuizCreateRequest
+    ) -> Quiz:
+        new_quiz = Quiz(
+            title=data.title,
+            question_number=data.question_number,
+            duration=data.duration,
+            pin=data.pin,
+            is_active=data.is_active,
+            user_id=data.user_id,
+            group_id=data.group_id,
+            subject_id=data.subject_id,
+        )
+        session.add(new_quiz)
+
+        try:
+            await session.commit()
+            await session.refresh(new_quiz)
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error",
+            )
+        return new_quiz
+
+    async def get_quiz(
+        self, session: AsyncSession, quiz_id: int
+    ) -> Quiz:
+        stmt = select(Quiz).where(Quiz.id == quiz_id)
+        result = await session.execute(stmt)
+        quiz = result.scalar_one_or_none()
+
+        if not quiz:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
+            )
+
+        return quiz
+
+    async def list_quizzes(
+        self, session: AsyncSession, request: QuizListRequest
+    ) -> QuizListResponse:
+        stmt = select(Quiz).offset(request.offset).limit(request.limit)
+
+        if request.title:
+            stmt = stmt.where(Quiz.title.ilike(f"%{request.title}%"))
+        
+        if request.user_id:
+            stmt = stmt.where(Quiz.user_id == request.user_id)
+        
+        if request.group_id:
+            stmt = stmt.where(Quiz.group_id == request.group_id)
+
+        if request.subject_id:
+            stmt = stmt.where(Quiz.subject_id == request.subject_id)
+
+        result = await session.execute(stmt)
+        quizzes = result.scalars().all()
+
+        count_stmt = select(func.count()).select_from(Quiz)
+        if request.title:
+            count_stmt = count_stmt.where(Quiz.title.ilike(f"%{request.title}%"))
+        if request.user_id:
+            count_stmt = count_stmt.where(Quiz.user_id == request.user_id)
+        if request.group_id:
+            count_stmt = count_stmt.where(Quiz.group_id == request.group_id)
+        if request.subject_id:
+            count_stmt = count_stmt.where(Quiz.subject_id == request.subject_id)
+
+        total_result = await session.execute(count_stmt)
+        total = total_result.scalar() or 0
+
+        return QuizListResponse(
+            total=total, page=request.page, limit=request.limit, quizzes=quizzes
+        )
+
+    async def update_quiz(
+        self, session: AsyncSession, quiz_id: int, data: QuizCreateRequest
+    ) -> Quiz:
+        stmt = select(Quiz).where(Quiz.id == quiz_id)
+        result = await session.execute(stmt)
+        quiz = result.scalar_one_or_none()
+
+        if not quiz:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
+            )
+        
+        quiz.title = data.title
+        quiz.question_number = data.question_number
+        quiz.duration = data.duration
+        quiz.pin = data.pin
+        quiz.is_active = data.is_active
+        quiz.user_id = data.user_id
+        quiz.group_id = data.group_id
+        quiz.subject_id = data.subject_id
+
+        await session.commit()
+        await session.refresh(quiz)
+        return quiz
+
+    async def delete_quiz(
+        self, session: AsyncSession, quiz_id: int
+    ) -> None:
+        stmt = select(Quiz).where(Quiz.id == quiz_id)
+        result = await session.execute(stmt)
+        quiz = result.scalar_one_or_none()
+
+        if not quiz:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
+            )
+
+        await session.delete(quiz)
+        await session.commit()
+
+
+get_quiz_repository = QuizRepository()
