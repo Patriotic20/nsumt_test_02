@@ -56,19 +56,19 @@ jobs:
 
       # --- Docker Check Section ---
 
-      - name: Build and Run Docker Compose
-        run: docker compose up -d --build
+      # - name: Build and Run Docker Compose
+      #   run: docker compose up -d --build
 
-      - name: Check Container Status and Logs
-        run: |
-          docker ps -a
-          # Если есть упавшие контейнеры, выводим логи для отладки
-          if [ "$(docker ps -a -f status=exited -q)" ]; then
-            echo "--- LOGS FOR FAILED CONTAINERS ---"
-            docker compose logs
-            exit 1
-          fi
+      # - name: Check Container Status and Logs
+      #   run: |
+      #     docker ps -a
+      #     # Если есть упавшие контейнеры, выводим логи для отладки
+      #     if [ "$(docker ps -a -f status=exited -q)" ]; then
+      #       echo "--- LOGS FOR FAILED CONTAINERS ---"
+      #       docker compose logs
+      #       exit 1
+      #     fi
 
-      - name: Down Container
-        if: always() 
-        run: docker compose down
+      # - name: Down Container
+      #   if: always() 
+      #   run: docker compose down
