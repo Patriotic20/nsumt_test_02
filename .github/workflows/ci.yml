@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: admin123
           POSTGRES_DB: test_db
         ports:
-          - 5432:5432
+          - 5436:5432
         options: >-
           --health-cmd "pg_isready -U bekzod -d test_db"
           --health-interval 10s
