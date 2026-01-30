@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      # Поднимаем Postgres
       postgres:
         image: postgres:17
         env:
@@ -18,9 +19,20 @@ jobs:
           POSTGRES_PASSWORD: admin123
           POSTGRES_DB: test_db
         ports:
-          - 5436:5432
+          - 5436:5432  # Пробрасываем 5432 из контейнера на 5436 для ваших тестов
         options: >-
           --health-cmd "pg_isready -U bekzod -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # ПОДНИМАЕМ REDIS
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -31,7 +43,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12" # 3.14 еще в разработке, 3.13 — актуальный выбор
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
