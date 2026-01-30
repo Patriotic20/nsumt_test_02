@@ -1,37 +1,37 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nusmt_test
-    restart: always
-    env_file: .env
-    # Это гарантирует, что app начнет запуск только ПОСЛЕ успешного healthcheck базы
-    depends_on:
-      database:
-        condition: service_healthy
-    ports:
-      - "8000:8000"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    volumes:
-      - .:/app
-      - ./logs:/app/logs
-      - ./app/static:/app/app/static
-      - ~/.logfire:/root/.logfire:ro
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: nusmt_test
+  #   restart: always
+  #   env_file: .env
+  #   # Это гарантирует, что app начнет запуск только ПОСЛЕ успешного healthcheck базы
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8000:8000"
+  #   healthcheck:
+  #     test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   volumes:
+  #     - .:/app
+  #     - ./logs:/app/logs
+  #     - ./app/static:/app/app/static
+  #     - ~/.logfire:/root/.logfire:ro
       
-      # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
-      # - /app/.venv 
-    networks:
-      - backend_network
-    environment:
-      - APP_CONFIG__REDIS__HOST=redis
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
-      - LOGFIRE_PROJECT_NAME=nsumt-tests
-      - LOGFIRE_TOKEN=pylf_v1_eu_x70x1Tnxy4r0PbGR5xkxL3Tr53SlLCP8tJyXZdGqFPkK
+  #     # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
+  #     # - /app/.venv 
+  #   networks:
+  #     - backend_network
+  #   environment:
+  #     - APP_CONFIG__REDIS__HOST=redis
+  #     - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+  #     - LOGFIRE_PROJECT_NAME=nsumt-tests
+  #     - LOGFIRE_TOKEN=pylf_v1_eu_x70x1Tnxy4r0PbGR5xkxL3Tr53SlLCP8tJyXZdGqFPkK
 
   database:
     image: postgres:17

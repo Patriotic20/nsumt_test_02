@@ -2,6 +2,10 @@ import pytest_asyncio
 from core.config import settings
 from core.db_helper import db_helper
 from httpx import ASGITransport, AsyncClient
+import redis.asyncio as redis
+from fastapi_limiter import FastAPILimiter
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from main import app
 from models.base import Base
 from sqlalchemy.ext.asyncio import (
@@ -10,6 +14,39 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.pool import NullPool
+
+
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def init_test_services():
+    """
+    Инициализация всех внешних сервисов (Limiter + Cache).
+    """
+    test_redis = redis.from_url(
+        "redis://localhost:6379", 
+        encoding="utf-8", 
+        decode_responses=True
+    )
+    
+    # 1. Инициализируем Limiter
+    await FastAPILimiter.init(test_redis)
+    
+    # 2. Инициализируем Cache (исправляет ошибку 'You must call init first!')
+    FastAPICache.init(RedisBackend(test_redis), prefix="fastapi-cache")
+    
+    yield
+    
+    await test_redis.aclose() # Используем aclose() вместо close() для новых версий
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def clear_test_redis():
+    """
+    Очистка Redis перед каждым тестом, чтобы избежать ошибки 429 (Rate Limit).
+    """
+    test_redis = redis.from_url("redis://localhost:6379")
+    await test_redis.flushdb() # Полностью очищаем базу перед тестом
+    await test_redis.aclose()
+    yield
 
 async_engine = create_async_engine(
     url=str(settings.database.test_url),
