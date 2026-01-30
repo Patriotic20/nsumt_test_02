@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_group_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=GroupCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=GroupCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_group(
     data: GroupCreateRequest,
@@ -29,6 +34,7 @@ async def create_group(
 
 
 @router.get("/{group_id}", response_model=GroupCreateResponse)
+@cache(expire=60)
 async def get_group(
     group_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_group(
 
 
 @router.get("/", response_model=GroupListResponse)
+@cache(expire=60)
 async def list_groups(
     data: GroupListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_groups(
     )
 
 
-@router.put("/{group_id}", response_model=GroupCreateResponse)
+@router.put("/{group_id}", response_model=GroupCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_group(
     group_id: int,
     data: GroupCreateRequest,
@@ -62,7 +69,7 @@ async def update_group(
     )
 
 
-@router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_group(
     group_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

@@ -10,6 +10,9 @@ from .teacher.router import router as teacher_router
 from .question.router import router as question_router
 from .quiz.router import router as quiz_router
 from .quiz_process.router import router as quiz_process_router
+from .result.router import router as result_router
+from .statistics.router import router as statistics_router
+from .hemis.router import router as hemis_router
 
 router = APIRouter()
 
@@ -23,3 +26,6 @@ router.include_router(teacher_router)
 router.include_router(question_router)
 router.include_router(quiz_router)
 router.include_router(quiz_process_router)
+router.include_router(result_router)
+router.include_router(statistics_router)
+router.include_router(hemis_router)

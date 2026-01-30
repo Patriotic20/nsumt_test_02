@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_question_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=QuestionCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=QuestionCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_question(
     data: QuestionCreateRequest,
@@ -29,6 +34,7 @@ async def create_question(
 
 
 @router.get("/{question_id}", response_model=QuestionCreateResponse)
+@cache(expire=60)
 async def get_question(
     question_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_question(
 
 
 @router.get("/", response_model=QuestionListResponse)
+@cache(expire=60)
 async def list_questions(
     data: QuestionListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_questions(
     )
 
 
-@router.put("/{question_id}", response_model=QuestionCreateResponse)
+@router.put("/{question_id}", response_model=QuestionCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_question(
     question_id: int,
     data: QuestionCreateRequest,
@@ -62,7 +69,7 @@ async def update_question(
     )
 
 
-@router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_question(
     question_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -73,7 +80,7 @@ async def delete_question(
     )
 
 
-@router.post("/upload_image", status_code=status.HTTP_200_OK)
+@router.post("/upload_image", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def upload_image(
     file: UploadFile = File(...),
     _: PermissionRequired = Depends(PermissionRequired("create:question")),
@@ -82,7 +89,7 @@ async def upload_image(
     return {"url": url}
 
 
-@router.post("/upload_excel", status_code=status.HTTP_201_CREATED)
+@router.post("/upload_excel", status_code=status.HTTP_201_CREATED, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def upload_questions_excel(
     subject_id: int,
     file: UploadFile = File(...),

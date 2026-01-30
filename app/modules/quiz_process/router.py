@@ -1,6 +1,8 @@
 from core.db_helper import db_helper
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from dependence.role_checker import PermissionRequired
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_quiz_process_repository
 from .schemas import (
@@ -20,20 +22,28 @@ router = APIRouter(
 
 
 @router.post(
-    "/start_quiz", response_model=StartQuizResponse, status_code=status.HTTP_200_OK
+    "/start_quiz", 
+    response_model=StartQuizResponse, 
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def start_quiz(
     data: StartQuizRequest,
     session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("quiz_process:start_quiz")),
 ):
     return await get_quiz_process_repository.start_quiz(session=session, data=data)
 
 
 @router.post(
-    "/end_quiz", response_model=EndQuizResponse, status_code=status.HTTP_200_OK
+    "/end_quiz", 
+    response_model=EndQuizResponse, 
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def end_quiz(
     data: EndQuizRequest,
     session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("quiz_process:end_quiz")),
 ):
     return await get_quiz_process_repository.end_quiz(session=session, data=data)

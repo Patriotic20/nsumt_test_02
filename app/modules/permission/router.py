@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_permission_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=PermissionCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=PermissionCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_permission(
     data: PermissionCreateRequest,
@@ -29,6 +34,7 @@ async def create_permission(
 
 
 @router.get("/{permission_id}", response_model=PermissionCreateResponse)
+@cache(expire=60)
 async def get_permission(
     permission_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_permission(
 
 
 @router.get("/", response_model=PermissionListResponse)
+@cache(expire=60)
 async def list_permissions(
     data: PermissionListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_permissions(
     )
 
 
-@router.put("/{permission_id}", response_model=PermissionCreateResponse)
+@router.put("/{permission_id}", response_model=PermissionCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_permission(
     permission_id: int,
     data: PermissionCreateRequest,
@@ -62,7 +69,7 @@ async def update_permission(
     )
 
 
-@router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_permission(
     permission_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

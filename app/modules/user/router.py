@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_user_repository
 from .schemas import (
@@ -21,14 +23,14 @@ router = APIRouter(
 )
 
 
-@router.post("/login", response_model=UserLoginResponse)
+@router.post("/login", response_model=UserLoginResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def login(
     data: UserLoginRequest, session: AsyncSession = Depends(db_helper.session_getter)
 ):
     return await auth_service.login(session=session, data=data)
 
 
-@router.post("/refresh", response_model=UserLoginResponse)
+@router.post("/refresh", response_model=UserLoginResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def refresh(
     authorization: str = Header(...),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -37,6 +39,7 @@ async def refresh(
 
 
 @router.get("/me", response_model=UserCreateResponse)
+@cache(expire=60)
 async def get_me(
     authorization: str = Header(...),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -45,7 +48,10 @@ async def get_me(
 
 
 @router.post(
-    "/", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=UserCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_user(
     data: UserCreateRequest,
@@ -56,6 +62,7 @@ async def create_user(
 
 
 @router.get("/{user_id}", response_model=UserCreateResponse)
+@cache(expire=60)
 async def get_user(
     user_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -65,6 +72,7 @@ async def get_user(
 
 
 @router.get("/", response_model=UserListResponse)
+@cache(expire=60)
 async def list_users(
     # Используем Depends, чтобы параметры шли из Query string (?page=1&limit=10)
     data: UserListRequest = Depends(),
@@ -74,7 +82,7 @@ async def list_users(
     return await get_user_repository.list_users(session=session, request=data)
 
 
-@router.put("/{user_id}", response_model=UserCreateResponse)
+@router.put("/{user_id}", response_model=UserCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_user(
     user_id: int,
     data: UserUpdateRequest,
@@ -86,7 +94,7 @@ async def update_user(
     )
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_user(
     user_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

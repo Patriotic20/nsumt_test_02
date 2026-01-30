@@ -1,0 +1,64 @@
+name: CI with Test DB
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: bekzod
+          POSTGRES_PASSWORD: admin123
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bekzod -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # 3.14 еще в разработке, 3.13 — актуальный выбор
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          uv sync
+
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          pytest
+
+      # --- Docker Check Section ---
+
+      - name: Build and Run Docker Compose
+        run: docker compose up -d --build
+
+      - name: Check Container Status and Logs
+        run: |
+          docker ps -a
+          # Если есть упавшие контейнеры, выводим логи для отладки
+          if [ "$(docker ps -a -f status=exited -q)" ]; then
+            echo "--- LOGS FOR FAILED CONTAINERS ---"
+            docker compose logs
+            exit 1
+          fi
+
+      - name: Down Container
+        if: always() 
+        run: docker compose down

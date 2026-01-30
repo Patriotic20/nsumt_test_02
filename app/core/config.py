@@ -49,7 +49,8 @@ class FileUrl(BaseModel):
 
 
 class HemisConfig(BaseModel):
-    base_url: str
+    login_url: str
+    me_url: str
 
 
 class RedisConfig(BaseModel):
@@ -78,7 +79,7 @@ class AppConfig(BaseSettings):
     admin: AdminConfig
     hemis: HemisConfig
     file_url: FileUrl
-    # redis: RedisConfig
+    redis: RedisConfig
 
 
 settings = AppConfig()

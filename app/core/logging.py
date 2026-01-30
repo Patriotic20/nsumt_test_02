@@ -1,7 +1,13 @@
+
 import logging
 import os
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
+import logfire
+from logfire import LogfireLoggingHandler
+
+# --- Logfire Setup ---
+logfire.configure()
 
 # --- Base setup ---
 LOG_DIR = "logs"
@@ -23,7 +29,7 @@ detailed_formatter = logging.Formatter(
 )
 
 console_formatter = logging.Formatter(
-    "%(asctime)s | %(levelname)-8s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 debug_formatter = logging.Formatter(
@@ -45,7 +51,23 @@ class LevelFilter(logging.Filter):
 
 # --- Root logger ---
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)  # Default to INFO to suppress noisy library debug logs
+
+# --- App-specific loggers to DEBUG ---
+# Enable DEBUG for our own application modules
+for module in ["core", "middleware", "models", "modules", "dependence", "lifespan", "app"]:
+    logging.getLogger(module).setLevel(logging.DEBUG)
+
+# --- Suppress Noisy Libraries ---
+logging.getLogger("watchfiles").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
+
+
+# --- Logfire Handler ---
+# Add Logfire handler to root logger
+logfire_handler = LogfireLoggingHandler()
+logfire_handler.setLevel(logging.INFO) # Default to INFO for Logfire to reduce noise, or DEBUG if preferred
+logger.addHandler(logfire_handler)
 
 
 # --- Console handler ---

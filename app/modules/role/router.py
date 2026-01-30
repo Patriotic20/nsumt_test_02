@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_role_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=RoleCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=RoleCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_role(
     data: RoleCreateRequest,
@@ -29,6 +34,7 @@ async def create_role(
 
 
 @router.get("/{role_id}", response_model=RoleCreateResponse)
+@cache(expire=60)
 async def get_role(
     role_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -38,6 +44,7 @@ async def get_role(
 
 
 @router.get("/", response_model=RoleListResponse)
+@cache(expire=60)
 async def list_roles(
     data: RoleListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -46,7 +53,7 @@ async def list_roles(
     return await get_role_repository.list_roles(session=session, request=data)
 
 
-@router.put("/{role_id}", response_model=RoleCreateResponse)
+@router.put("/{role_id}", response_model=RoleCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_role(
     role_id: int,
     data: RoleCreateRequest,
@@ -58,7 +65,7 @@ async def update_role(
     )
 
 
-@router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_role(
     role_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

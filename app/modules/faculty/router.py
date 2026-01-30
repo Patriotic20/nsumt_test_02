@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_faculty_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=FacultyCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=FacultyCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_faculty(
     data: FacultyCreateRequest,
@@ -29,6 +34,7 @@ async def create_faculty(
 
 
 @router.get("/{faculty_id}", response_model=FacultyCreateResponse)
+@cache(expire=60)
 async def get_faculty(
     faculty_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_faculty(
 
 
 @router.get("/", response_model=FacultyListResponse)
+@cache(expire=60)
 async def list_faculties(
     data: FacultyListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_faculties(
     )
 
 
-@router.put("/{faculty_id}", response_model=FacultyCreateResponse)
+@router.put("/{faculty_id}", response_model=FacultyCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_faculty(
     faculty_id: int,
     data: FacultyCreateRequest,
@@ -62,7 +69,7 @@ async def update_faculty(
     )
 
 
-@router.delete("/{faculty_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{faculty_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_faculty(
     faculty_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

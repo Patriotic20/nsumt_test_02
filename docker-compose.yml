@@ -1,32 +1,43 @@
 services:
-  # app:
-  #   image: my-backend-image:latest
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: my-backend-container
-  #   restart: always
-  #   env_file: .env
-  #   # Это гарантирует, что app начнет запуск только ПОСЛЕ успешного healthcheck базы
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - .:/app
-  #     # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
-  #     # - /app/.venv 
-  #   networks:
-  #     - backend_network
-  #   environment:
-  #     - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nusmt_test
+    restart: always
+    env_file: .env
+    # Это гарантирует, что app начнет запуск только ПОСЛЕ успешного healthcheck базы
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+      - ./app/static:/app/app/static
+      - ~/.logfire:/root/.logfire:ro
+      
+      # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
+      # - /app/.venv 
+    networks:
+      - backend_network
+    environment:
+      - APP_CONFIG__REDIS__HOST=redis
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      - LOGFIRE_PROJECT_NAME=nsumt-tests
+      - LOGFIRE_TOKEN=pylf_v1_eu_x70x1Tnxy4r0PbGR5xkxL3Tr53SlLCP8tJyXZdGqFPkK
 
   database:
     image: postgres:17
     container_name: database
     restart: always
-    env_file: .env 
+    env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -36,12 +47,30 @@ services:
     networks:
       - backend_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s   # Ускорим проверку для старта
+      test: [ "CMD-SHELL", "pg_isready -q -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s # Ускорим проверку для старта
       timeout: 5s
       retries: 5
     volumes:
       - postgres_data_quiz:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    restart: always
+    # Используем AOF для сохранения данных при перезагрузке
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   backend_network:
@@ -49,3 +78,4 @@ networks:
 
 volumes:
   postgres_data_quiz:
+  redis_data:

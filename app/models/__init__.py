@@ -14,6 +14,7 @@ __all__ = [
     "Question",
     "Quiz",
     "QuizQuestion",
+    "Result",
 ]
 
 
@@ -34,3 +35,4 @@ from .subject_teacher.model import SubjectTeacher
 from .question.model import Question
 from .quiz.model import Quiz
 from .quiz_questions.model import QuizQuestion
+from .results.model import Result

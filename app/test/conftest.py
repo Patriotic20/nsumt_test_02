@@ -107,3 +107,57 @@ async def create_permission(async_client, access_token):
     response = await async_client.post("/permission/", json=payload)
 
     assert response.status_code == 201
+
+
+@pytest_asyncio.fixture
+async def test_subject(async_db):
+    """Create a subject directly in DB since there is no API for it"""
+    from models.subject.model import Subject
+    subject = Subject(name="Mathematics")
+    async_db.add(subject)
+    await async_db.commit()
+    await async_db.refresh(subject)
+    return subject
+
+
+@pytest_asyncio.fixture
+async def test_faculty(auth_client):
+    payload = {"name": "IT Faculty"}
+    response = await auth_client.post("/faculty/", json=payload)
+    assert response.status_code == 201
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def test_kafedra(auth_client, test_faculty):
+    payload = {
+        "name": "Software Engineering",
+        "faculty_id": test_faculty["id"]
+    }
+    response = await auth_client.post("/kafedra/", json=payload)
+    assert response.status_code == 201
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def test_group(auth_client, test_faculty):
+    payload = {
+        "name": "SE-2023",
+        "faculty_id": test_faculty["id"]
+    }
+    response = await auth_client.post("/group/", json=payload)
+    assert response.status_code == 201
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def test_teacher(auth_client, test_kafedra):
+    payload = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "third_name": "Smith",
+        "kafedra_id": test_kafedra["id"]
+    }
+    response = await auth_client.post("/teacher/", json=payload)
+    assert response.status_code == 201
+    return response.json()

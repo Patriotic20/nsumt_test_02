@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_kafedra_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=KafedraCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=KafedraCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_kafedra(
     data: KafedraCreateRequest,
@@ -29,6 +34,7 @@ async def create_kafedra(
 
 
 @router.get("/{kafedra_id}", response_model=KafedraCreateResponse)
+@cache(expire=60)
 async def get_kafedra(
     kafedra_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_kafedra(
 
 
 @router.get("/", response_model=KafedraListResponse)
+@cache(expire=60)
 async def list_kafedras(
     data: KafedraListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_kafedras(
     )
 
 
-@router.put("/{kafedra_id}", response_model=KafedraCreateResponse)
+@router.put("/{kafedra_id}", response_model=KafedraCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_kafedra(
     kafedra_id: int,
     data: KafedraCreateRequest,
@@ -62,7 +69,7 @@ async def update_kafedra(
     )
 
 
-@router.delete("/{kafedra_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{kafedra_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_kafedra(
     kafedra_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),

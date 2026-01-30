@@ -25,10 +25,10 @@ class UserView(ModelView, model=User):
         "updated_at",
     ]
 
-    column_formatters = {
-        "created_at": User.created_at,
-        "updated_at": User.updated_at,
-    }
+    # column_formatters = {
+    #     "created_at": User.created_at,
+    #     "updated_at": User.updated_at,
+    # }
 
     column_searchable_list = ("username",)
 

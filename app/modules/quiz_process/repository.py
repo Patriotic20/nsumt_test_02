@@ -68,12 +68,16 @@ class QuizProcessRepository:
 
         for q in quiz_questions:
             q_dict = q.to_dict(randomize_options=True)
+            opts = q_dict["options"]
             
             question_dtos.append(
                 QuestionDTO(
                     id=q_dict["id"],
                     text=q_dict["text"],
-                    options=q_dict["options"]
+                    option_a=opts[0],
+                    option_b=opts[1],
+                    option_c=opts[2],
+                    option_d=opts[3],
                 )
             )
 

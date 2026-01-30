@@ -2,6 +2,8 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_quiz_repository
 from .schemas import (
@@ -18,7 +20,10 @@ router = APIRouter(
 
 
 @router.post(
-    "/", response_model=QuizCreateResponse, status_code=status.HTTP_201_CREATED
+    "/", 
+    response_model=QuizCreateResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
 )
 async def create_quiz(
     data: QuizCreateRequest,
@@ -29,6 +34,7 @@ async def create_quiz(
 
 
 @router.get("/{quiz_id}", response_model=QuizCreateResponse)
+@cache(expire=60)
 async def get_quiz(
     quiz_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -40,6 +46,7 @@ async def get_quiz(
 
 
 @router.get("/", response_model=QuizListResponse)
+@cache(expire=60)
 async def list_quizzes(
     data: QuizListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -50,7 +57,7 @@ async def list_quizzes(
     )
 
 
-@router.put("/{quiz_id}", response_model=QuizCreateResponse)
+@router.put("/{quiz_id}", response_model=QuizCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def update_quiz(
     quiz_id: int,
     data: QuizCreateRequest,
@@ -62,7 +69,7 @@ async def update_quiz(
     )
 
 
-@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
 async def delete_quiz(
     quiz_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
