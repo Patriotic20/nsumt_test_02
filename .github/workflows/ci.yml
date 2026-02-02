@@ -75,6 +75,8 @@ jobs:
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "LOGFIRE_PROJECT_NAME=${{ secrets.LOGFIRE_PROJECT_NAME }}" >> .env
+          echo "LOGFIRE_TOKEN=${{ secrets.LOGFIRE_TOKEN }}" >> .env
 
       # STEP: Create the second .env (App Folder)
       - name: Create App .env file
