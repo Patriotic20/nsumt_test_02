@@ -1,4 +1,4 @@
-name: CI with Test DB
+name: CI/CD with Dual Env Files
 
 on:
   push:
@@ -7,9 +7,9 @@ on:
     branches: [main]
 
 jobs:
+  # JOB 1: CI (Run Tests)
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:17
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12" # 3.14 еще в разработке, 3.13 — актуальный выбор
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -50,25 +50,64 @@ jobs:
           uv sync
 
       - name: Run tests
+        env:
+          # Injecting only what is needed for tests
+          APP_CONFIG__DATABASE__TEST_URL: ${{ secrets.APP_CONFIG__DATABASE__TEST_URL }}
+          APP_CONFIG__REDIS__HOST: localhost
+          APP_CONFIG__REDIS__PORT: 6379
         run: |
           source .venv/bin/activate
           pytest
 
-      # --- Docker Check Section ---
+  # JOB 2: CD (Deploy to Self-Hosted)
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # - name: Build and Run Docker Compose
-      #   run: docker compose up -d --build
+      # STEP: Create the first .env (Project Root)
+      - name: Create Root .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
 
-      # - name: Check Container Status and Logs
-      #   run: |
-      #     docker ps -a
-      #     # Если есть упавшие контейнеры, выводим логи для отладки
-      #     if [ "$(docker ps -a -f status=exited -q)" ]; then
-      #       echo "--- LOGS FOR FAILED CONTAINERS ---"
-      #       docker compose logs
-      #       exit 1
-      #     fi
+      # STEP: Create the second .env (App Folder)
+      - name: Create App .env file
+        run: |
+          mkdir -p app  # Ensures the app directory exists
+          touch app/.env
+          echo "APP_CONFIG__DATABASE__URL=${{ secrets.APP_CONFIG__DATABASE__URL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__TEST_URL=${{ secrets.APP_CONFIG__DATABASE__TEST_URL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__ECHO=${{ secrets.APP_CONFIG__DATABASE__ECHO }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__ECHO_POOL=${{ secrets.APP_CONFIG__DATABASE__ECHO_POOL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__POOL_SIZE=${{ secrets.APP_CONFIG__DATABASE__POOL_SIZE }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__MAX_OVERFLOW=${{ secrets.APP_CONFIG__DATABASE__MAX_OVERFLOW }}" >> app/.env
+          echo "APP_CONFIG__SERVER__APP_PATH=${{ secrets.APP_CONFIG__SERVER__APP_PATH }}" >> app/.env
+          echo "APP_CONFIG__SERVER__HOST=${{ secrets.APP_CONFIG__SERVER__HOST }}" >> app/.env
+          echo "APP_CONFIG__SERVER__PORT=${{ secrets.APP_CONFIG__SERVER__PORT }}" >> app/.env
+          echo "APP_CONFIG__JWT__ACCESS_TOKEN_SECRET=${{ secrets.APP_CONFIG__JWT__ACCESS_TOKEN_SECRET }}" >> app/.env
+          echo "APP_CONFIG__JWT__REFRESH_TOKEN_SECRET=${{ secrets.APP_CONFIG__JWT__REFRESH_TOKEN_SECRET }}" >> app/.env
+          echo "APP_CONFIG__JWT__ACCESS_TOKEN_EXPIRES_MINUTES=${{ secrets.APP_CONFIG__JWT__ACCESS_TOKEN_EXPIRES_MINUTES }}" >> app/.env
+          echo "APP_CONFIG__JWT__REFRESH_TOKEN_EXPIRES_DAYS=${{ secrets.APP_CONFIG__JWT__REFRESH_TOKEN_EXPIRES_DAYS }}" >> app/.env
+          echo "APP_CONFIG__JWT__ALGORITHM=${{ secrets.APP_CONFIG__JWT__ALGORITHM }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__USERNAME=${{ secrets.APP_CONFIG__ADMIN__USERNAME }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__PASSWORD=${{ secrets.APP_CONFIG__ADMIN__PASSWORD }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__SECRET_KEY=${{ secrets.APP_CONFIG__ADMIN__SECRET_KEY }}" >> app/.env
+          echo "APP_CONFIG__FILE_URL__HTTP=${{ secrets.APP_CONFIG__FILE_URL__HTTP }}" >> app/.env
+          echo "APP_CONFIG__FILE_URL__UPLOAD_DIR=${{ secrets.APP_CONFIG__FILE_URL__UPLOAD_DIR }}" >> app/.env
+          echo "APP_CONFIG__HEMIS__LOGIN_URL=${{ secrets.APP_CONFIG__HEMIS__LOGIN_URL }}" >> app/.env
+          echo "APP_CONFIG__HEMIS__ME_URL=${{ secrets.APP_CONFIG__HEMIS__ME_URL }}" >> app/.env
+          echo "APP_CONFIG__REDIS__HOST=${{ secrets.APP_CONFIG__REDIS__HOST }}" >> app/.env
+          echo "APP_CONFIG__REDIS__PORT=${{ secrets.APP_CONFIG__REDIS__PORT }}" >> app/.env
+          echo "APP_CONFIG__REDIS__PREFIX=${{ secrets.APP_CONFIG__REDIS__PREFIX }}" >> app/.env
 
-      # - name: Down Container
-      #   if: always() 
-      #   run: docker compose down
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose down
+          docker compose up -d --build 
+          docker image prune -f
