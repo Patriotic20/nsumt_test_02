@@ -14,6 +14,7 @@ from models.quiz.view import QuizView
 from models.quiz_questions.view import QuizQuestionView
 from models.subject_teacher.view import SubjectTeacherView
 from models.results.view import ResultView
+from models.user_answers.view import UserAnswersView
 from sqladmin import Admin
 
 
@@ -34,3 +35,4 @@ def register_models(admin: Admin):
     admin.add_view(QuizQuestionView)
     admin.add_view(SubjectTeacherView)
     admin.add_view(ResultView)
+    admin.add_view(UserAnswersView)

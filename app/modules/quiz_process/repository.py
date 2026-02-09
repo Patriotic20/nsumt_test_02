@@ -7,6 +7,7 @@ from models.quiz.model import Quiz
 from models.question.model import Question
 from models.results.model import Result
 from models.quiz_questions.model import QuizQuestion
+from models.user_answers.model import UserAnswers
 
 from .schemas import (
     StartQuizRequest,
@@ -117,15 +118,27 @@ class QuizProcessRepository:
         
         for ans in data.answers:
             question = questions_map.get(ans.question_id)
+            is_correct = False
             if question:
                 # Option A is always correct
                 if ans.answer == question.option_a:
                     correct_count += 1
+                    is_correct = True
                 else:
                     wrong_count += 1
             else:
                 # Question not found? Count as wrong?
                 wrong_count += 1
+            
+            # Save user answer
+            user_answer = UserAnswers(
+                user_id=data.user_id,
+                quiz_id=data.quiz_id,
+                question_id=ans.question_id,
+                answer=ans.answer,
+                is_correct=is_correct
+            )
+            session.add(user_answer)
         
         total_questions = len(data.answers) # Or strictly correct + wrong
         
