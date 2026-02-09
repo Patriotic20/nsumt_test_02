@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from models.kafedra.model import Kafedra
     from models.subject.model import Subject
     from models.subject_teacher.model import SubjectTeacher
+    from models.group_teachers.model import GroupTeacher
 
 
 class Teacher(Base, IdIntPk, TimestampMixin):
@@ -26,6 +27,12 @@ class Teacher(Base, IdIntPk, TimestampMixin):
     subject_teachers: Mapped[list["SubjectTeacher"]] = relationship(
         "SubjectTeacher",
         back_populates="teacher",
+    )
+
+    teacher_groups: Mapped[list["GroupTeacher"]] = relationship(
+        "GroupTeacher", 
+        back_populates="teacher",
+        cascade="all, delete-orphan"
     )
 
     def __str__(self):

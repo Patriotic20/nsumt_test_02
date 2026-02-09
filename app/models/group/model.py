@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from models.student.model import Student
     from models.quiz.model import Quiz
     from models.results.model import Result
+    from models.group_teachers.model import GroupTeacher
 
 
 class Group(Base, IdIntPk, TimestampMixin):
@@ -36,6 +37,12 @@ class Group(Base, IdIntPk, TimestampMixin):
     results: Mapped[list["Result"]] = relationship(
         "Result", 
         back_populates="group"
+    )
+
+    group_teachers: Mapped[list["GroupTeacher"]] = relationship(
+        "GroupTeacher",
+        back_populates="group",
+        cascade="all, delete-orphan"
     )
 
 
