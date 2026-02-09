@@ -43,6 +43,44 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Create Root .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "LOGFIRE_PROJECT_NAME=${{ secrets.LOGFIRE_PROJECT_NAME }}" >> .env
+          echo "LOGFIRE_TOKEN=${{ secrets.LOGFIRE_TOKEN }}" >> .env
+
+      # STEP: Create the second .env (App Folder)
+      - name: Create App .env file
+        run: |
+          mkdir -p app  # Ensures the app directory exists
+          touch app/.env
+          echo "APP_CONFIG__DATABASE__URL=${{ secrets.APP_CONFIG__DATABASE__URL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__TEST_URL=${{ secrets.APP_CONFIG__DATABASE__TEST_URL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__ECHO=${{ secrets.APP_CONFIG__DATABASE__ECHO }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__ECHO_POOL=${{ secrets.APP_CONFIG__DATABASE__ECHO_POOL }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__POOL_SIZE=${{ secrets.APP_CONFIG__DATABASE__POOL_SIZE }}" >> app/.env
+          echo "APP_CONFIG__DATABASE__MAX_OVERFLOW=${{ secrets.APP_CONFIG__DATABASE__MAX_OVERFLOW }}" >> app/.env
+          echo "APP_CONFIG__SERVER__APP_PATH=${{ secrets.APP_CONFIG__SERVER__APP_PATH }}" >> app/.env
+          echo "APP_CONFIG__SERVER__HOST=${{ secrets.APP_CONFIG__SERVER__HOST }}" >> app/.env
+          echo "APP_CONFIG__SERVER__PORT=${{ secrets.APP_CONFIG__SERVER__PORT }}" >> app/.env
+          echo "APP_CONFIG__JWT__ACCESS_TOKEN_SECRET=${{ secrets.APP_CONFIG__JWT__ACCESS_TOKEN_SECRET }}" >> app/.env
+          echo "APP_CONFIG__JWT__REFRESH_TOKEN_SECRET=${{ secrets.APP_CONFIG__JWT__REFRESH_TOKEN_SECRET }}" >> app/.env
+          echo "APP_CONFIG__JWT__ACCESS_TOKEN_EXPIRES_MINUTES=${{ secrets.APP_CONFIG__JWT__ACCESS_TOKEN_EXPIRES_MINUTES }}" >> app/.env
+          echo "APP_CONFIG__JWT__REFRESH_TOKEN_EXPIRES_DAYS=${{ secrets.APP_CONFIG__JWT__REFRESH_TOKEN_EXPIRES_DAYS }}" >> app/.env
+          echo "APP_CONFIG__JWT__ALGORITHM=${{ secrets.APP_CONFIG__JWT__ALGORITHM }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__USERNAME=${{ secrets.APP_CONFIG__ADMIN__USERNAME }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__PASSWORD=${{ secrets.APP_CONFIG__ADMIN__PASSWORD }}" >> app/.env
+          echo "APP_CONFIG__ADMIN__SECRET_KEY=${{ secrets.APP_CONFIG__ADMIN__SECRET_KEY }}" >> app/.env
+          echo "APP_CONFIG__FILE_URL__HTTP=${{ secrets.APP_CONFIG__FILE_URL__HTTP }}" >> app/.env
+          echo "APP_CONFIG__FILE_URL__UPLOAD_DIR=${{ secrets.APP_CONFIG__FILE_URL__UPLOAD_DIR }}" >> app/.env
+          echo "APP_CONFIG__HEMIS__LOGIN_URL=${{ secrets.APP_CONFIG__HEMIS__LOGIN_URL }}" >> app/.env
+          echo "APP_CONFIG__HEMIS__ME_URL=${{ secrets.APP_CONFIG__HEMIS__ME_URL }}" >> app/.env
+          echo "APP_CONFIG__REDIS__HOST=${{ secrets.APP_CONFIG__REDIS__HOST }}" >> app/.env
+          echo "APP_CONFIG__REDIS__PORT=${{ secrets.APP_CONFIG__REDIS__PORT }}" >> app/.env
+          echo "APP_CONFIG__REDIS__PREFIX=${{ secrets.APP_CONFIG__REDIS__PREFIX }}" >> app/.env
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
