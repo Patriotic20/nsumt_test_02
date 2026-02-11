@@ -34,7 +34,7 @@ async def test_get_role_by_id(auth_client):
 
     assert response.status_code == 200
     assert response.json()["id"] == 1
-    assert response.json()["name"] == "admin"
+    assert response.json()["name"] == "Admin"
     assert "created_at" in response.json()
     assert "updated_at" in response.json()
 

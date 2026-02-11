@@ -32,7 +32,8 @@ class TeacherRepository:
             last_name=data.last_name,
             third_name=data.third_name,
             full_name=full_name,
-            kafedra_id=data.kafedra_id
+            kafedra_id=data.kafedra_id,
+            user_id=data.user_id
         )
         session.add(new_teacher)
 

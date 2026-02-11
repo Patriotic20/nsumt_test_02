@@ -3,11 +3,22 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_create_teacher(auth_client, test_kafedra):
+    # Create a user for the teacher
+    user_payload = {
+        "username": "teacher_create_user",
+        "password": "password123",
+        "roles": [{"name": "Admin"}]
+    }
+    user_response = await auth_client.post("/user/", json=user_payload)
+    assert user_response.status_code == 201
+    user_data = user_response.json()
+
     payload = {
         "first_name": "Alice",
         "last_name": "Johnson",
         "third_name": "Marie",
-        "kafedra_id": test_kafedra["id"]
+        "kafedra_id": test_kafedra["id"],
+        "user_id": user_data["id"]
     }
     response = await auth_client.post("/teacher/", json=payload)
     assert response.status_code == 201
@@ -41,7 +52,8 @@ async def test_update_teacher(auth_client, test_teacher):
         "first_name": "Updated Alice",
         "last_name": "Updated Johnson",
         "third_name": "Marie",
-        "kafedra_id": test_teacher["kafedra_id"]
+        "kafedra_id": test_teacher["kafedra_id"],
+        "user_id": test_teacher["user_id"]
     }
     response = await auth_client.put(f"/teacher/{test_teacher['id']}", json=payload)
     assert response.status_code == 200

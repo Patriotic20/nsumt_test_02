@@ -94,10 +94,14 @@ async def async_client(async_db):
 
 
 @pytest_asyncio.fixture
-async def test_role(async_client):
-    response = await async_client.post("/role/", json={"name": "admin"})
-    assert response.status_code == 201
-    return response.json()
+async def test_role(async_db):
+    from models.role.model import Role
+
+    role = Role(name="Admin")
+    async_db.add(role)
+    await async_db.commit()
+    await async_db.refresh(role)
+    return role
 
 
 @pytest_asyncio.fixture
@@ -105,12 +109,14 @@ async def test_user(async_client, test_role):
     payload = {
         "username": "test_user",
         "password": "password123",
-        "roles": [{"name": "admin"}],
+        "roles": [{"name": "Admin"}],
     }
 
     response = await async_client.post("/user/", json=payload)
     assert response.status_code == 201
-    return payload
+    data = response.json()
+    data["password"] = payload["password"]
+    return data
 
 
 @pytest_asyncio.fixture
@@ -189,11 +195,21 @@ async def test_group(auth_client, test_faculty):
 
 @pytest_asyncio.fixture
 async def test_teacher(auth_client, test_kafedra):
+    user_payload = {
+        "username": "teacher_fixture_user",
+        "password": "password123",
+        "roles": [{"name": "Admin"}]
+    }
+    user_response = await auth_client.post("/user/", json=user_payload)
+    assert user_response.status_code == 201
+    user_data = user_response.json()
+
     payload = {
         "first_name": "John",
         "last_name": "Doe",
         "third_name": "Smith",
-        "kafedra_id": test_kafedra["id"]
+        "kafedra_id": test_kafedra["id"],
+        "user_id": user_data["id"]
     }
     response = await auth_client.post("/teacher/", json=payload)
     assert response.status_code == 201
