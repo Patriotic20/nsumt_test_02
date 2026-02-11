@@ -11,11 +11,13 @@ if TYPE_CHECKING:
     from models.subject.model import Subject
     from models.subject_teacher.model import SubjectTeacher
     from models.group_teachers.model import GroupTeacher
-
+    
+    from models.user.model import User
 
 class Teacher(Base, IdIntPk, TimestampMixin):
     __tablename__ = "teachers"
     kafedra_id: Mapped[int] = mapped_column(ForeignKey("kafedras.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     last_name: Mapped[str] = mapped_column()
     first_name: Mapped[str] = mapped_column()
@@ -35,5 +37,7 @@ class Teacher(Base, IdIntPk, TimestampMixin):
         cascade="all, delete-orphan"
     )
 
+    user: Mapped["User"] = relationship("User", back_populates="teacher")
+
     def __str__(self):
-        return self.name
+        return self.full_name

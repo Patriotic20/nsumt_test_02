@@ -14,6 +14,7 @@ from .result.router import router as result_router
 from .statistics.router import router as statistics_router
 from .hemis.router import router as hemis_router
 from .user_answers.router import router as user_answers_router
+from .subject.router import router as subject_router
 
 router = APIRouter()
 
@@ -31,3 +32,4 @@ router.include_router(result_router)
 router.include_router(statistics_router)
 router.include_router(hemis_router)
 router.include_router(user_answers_router)
+router.include_router(subject_router)

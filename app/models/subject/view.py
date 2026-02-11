@@ -33,6 +33,8 @@ class SubjectView(ModelView, model=Subject):
     )
 
     form_excluded_columns = [
+        "subject_teachers",
+        "results",
         "teachers",
         "questions",
         "quizzes",

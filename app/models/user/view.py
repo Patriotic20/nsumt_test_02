@@ -19,16 +19,16 @@ class UserView(ModelView, model=User):
     }
 
     form_excluded_columns = [
-        # "roles",
+        "user_answers",
+        "teacher",
+        "questions",
+        "quizzes",
+        "results",
         "student",
         "created_at",
         "updated_at",
     ]
 
-    # column_formatters = {
-    #     "created_at": User.created_at,
-    #     "updated_at": User.updated_at,
-    # }
 
     column_searchable_list = ("username",)
 
@@ -46,6 +46,8 @@ class UserView(ModelView, model=User):
         "id",
         True,
     )
+
+
 
     async def on_model_change(self, data, model, is_created, request):
         # Check if the password is being sent in the form

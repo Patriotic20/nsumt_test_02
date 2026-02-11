@@ -72,6 +72,8 @@ class QuizView(ModelView, model=Quiz):
     )
 
     form_excluded_columns = [
+        "user_answers",
+        "results",
         "quiz_questions",
         "created_at",
         "updated_at",

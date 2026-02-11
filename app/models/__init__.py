@@ -15,6 +15,8 @@ __all__ = [
     "Quiz",
     "QuizQuestion",
     "Result",
+    "UserAnswers",
+    "GroupTeacher",
 ]
 
 
@@ -36,3 +38,5 @@ from .question.model import Question
 from .quiz.model import Quiz
 from .quiz_questions.model import QuizQuestion
 from .results.model import Result
+from .user_answers.model import UserAnswers
+from .group_teachers.model import GroupTeacher

@@ -19,9 +19,9 @@ class UserAnswers(Base, IdIntPk, TimestampMixin):
     answer: Mapped[str] = mapped_column(String(255), nullable=True)
     is_correct: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    user: Mapped["User"] = relationship("User", backref="user_answers")
-    quiz: Mapped["Quiz"] = relationship("Quiz", backref="user_answers")
-    question: Mapped["Question"] = relationship("Question", backref="user_answers")
+    user: Mapped["User"] = relationship("User", back_populates="user_answers")
+    quiz: Mapped["Quiz"] = relationship("Quiz", back_populates="user_answers")
+    question: Mapped["Question"] = relationship("Question", back_populates="user_answers")
 
     def __str__(self):
         return f"UserAnswer {self.id} - {self.answer}"

@@ -62,29 +62,21 @@ class PermissionRequired:
             )
 
         # Проверяем, является ли пользователь админом
-        is_admin = any(role.name == "admin" for role in user.roles)
+        is_admin = any(role.name == "Admin" for role in user.roles)
 
         if is_admin:
             return user  # Админ имеет доступ ко всему
 
         # Для не-админов проверяем конкретное разрешение
-        # 1. Проверяем существование разрешения
+        # Permissions are created at startup by init_db, no need to create here
         perm_stmt = select(Permission).where(Permission.name == self.permission_name)
         perm_result = await session.execute(perm_stmt)
         perm_obj = perm_result.scalar_one_or_none()
 
         if not perm_obj:
-            # Создаем разрешение, если его нет
-            perm_obj = Permission(name=self.permission_name)
-            session.add(perm_obj)
-            await session.commit()
-            await session.refresh(perm_obj)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"Permission '{self.permission_name}' created. "
-                    "Assign it to a role."
-                ),
+                detail=f"Permission '{self.permission_name}' not found. Restart the app to sync permissions.",
             )
 
         # 2. Проверяем наличие права у пользователя

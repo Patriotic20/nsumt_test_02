@@ -18,3 +18,8 @@ class GroupTeacherView(ModelView, model=GroupTeacher):
         "created_at": GroupTeacher.created_at,
         "updated_at": GroupTeacher.updated_at,
     }
+
+    form_excluded_columns = [
+        "created_at",
+        "updated_at",
+    ]

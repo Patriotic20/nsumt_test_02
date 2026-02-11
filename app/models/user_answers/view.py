@@ -21,3 +21,8 @@ class UserAnswersView(ModelView, model=UserAnswers):
     ]
 
     column_default_sort = ("id", True)
+
+    form_excluded_columns = [
+        "created_at",
+        "updated_at",
+    ]

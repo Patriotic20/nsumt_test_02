@@ -33,6 +33,8 @@ class GroupView(ModelView, model=Group):
     )
 
     form_excluded_columns = [
+        "results",
+        "group_teachers",
         "quizzes",
         "students",
         "created_at",

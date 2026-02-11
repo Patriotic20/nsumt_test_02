@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from models.subject.model import Subject
     from models.user.model import User
+    from models.user_answers.model import UserAnswers
+    from models.quiz_questions.model import QuizQuestion
 
 
 class Question(Base, IdIntPk, TimestampMixin):
@@ -39,6 +41,11 @@ class Question(Base, IdIntPk, TimestampMixin):
     quiz_questions: Mapped[list["QuizQuestion"]] = relationship(
         "QuizQuestion",
         back_populates="question",
+    )
+
+    user_answers: Mapped[list["UserAnswers"]] = relationship(
+        "UserAnswers", 
+        back_populates="question"
     )
 
     def __str__(self):

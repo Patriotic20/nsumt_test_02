@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from models.question.model import Question
     from models.quiz.model import Quiz
     from models.results.model import Result
+    from models.teacher.model import Teacher
+    from models.user_answers.model import UserAnswers
 
 
 class User(Base, IdIntPk, TimestampMixin):
@@ -40,6 +42,14 @@ class User(Base, IdIntPk, TimestampMixin):
         "Result", 
         back_populates="user"
     )
+
+
+    user_answers: Mapped[list["UserAnswers"]] = relationship(
+        "UserAnswers", 
+        back_populates="user"
+    )
+
+    teacher: Mapped["Teacher"] = relationship("Teacher", back_populates="user")
 
     def __str__(self):
         return self.username

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base import Base
 from models.mixins.id_int_pk import IdIntPk
 from models.mixins.time_stamp_mixin import TimestampMixin
-from models.question.model import Question                                                                                                                                      
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -12,6 +11,7 @@ if TYPE_CHECKING:
     from models.group.model import Group
     from models.quiz_questions.model import QuizQuestion
     from models.results.model import Result
+    from models.user_answers.model import UserAnswers
 
 
 class Quiz(Base, IdIntPk, TimestampMixin):
@@ -63,6 +63,11 @@ class Quiz(Base, IdIntPk, TimestampMixin):
         back_populates="quiz"
     )
 
+    user_answers: Mapped[list["UserAnswers"]] = relationship(
+        "UserAnswers", 
+        back_populates="quiz"
+    )
+
     def __str__(self):
         return self.title
 
@@ -70,5 +75,5 @@ class Quiz(Base, IdIntPk, TimestampMixin):
         return {
             "id": self.id,
             "title": self.title,
-            "questions": [question.to_dict() for question in self.questions],
+            "questions": [qq.question.to_dict() for qq in self.quiz_questions],
         }

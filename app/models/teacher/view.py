@@ -39,6 +39,8 @@ class TeacherView(ModelView, model=Teacher):
     )
 
     form_excluded_columns = [
+        "subject_teachers",
+        "teacher_groups",
         "subjects",
         "created_at",
         "updated_at",

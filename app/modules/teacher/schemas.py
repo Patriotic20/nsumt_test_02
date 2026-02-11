@@ -7,6 +7,7 @@ class TeacherCreateRequest(BaseModel):
     last_name: str
     third_name: str
     kafedra_id: int
+    user_id: int
 
     @field_validator("first_name", "last_name", "third_name", mode="before")
     @classmethod
@@ -18,6 +19,7 @@ class TeacherCreateRequest(BaseModel):
 
 class TeacherCreateResponse(BaseModel):
     id: int
+    user_id: int
     first_name: str
     last_name: str
     third_name: str
