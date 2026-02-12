@@ -23,11 +23,14 @@ class Student(Base, TimestampMixin, IdIntPk):
         Integer, ForeignKey("groups.id", ondelete="SET NULL"), nullable=True
     )
 
+    first_name: Mapped[str] = mapped_column(String)
+    last_name: Mapped[str] = mapped_column(String)
+    third_name: Mapped[str] = mapped_column(String)
     full_name: Mapped[str] = mapped_column(String)
     student_id_number: Mapped[str] = mapped_column(String)
     image_path: Mapped[str] = mapped_column(String)
     birth_date: Mapped[Date] = mapped_column(Date)
-    phone: Mapped[str] = mapped_column(String)
+    phone: Mapped[str] = mapped_column(String, nullable=True)
     gender: Mapped[str] = mapped_column(String)
     university: Mapped[str] = mapped_column(String)
     specialty: Mapped[str] = mapped_column(String)

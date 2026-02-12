@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Subject(Base, IdIntPk, TimestampMixin):
     __tablename__ = "subjects"
 
-    name: Mapped[str] = mapped_column(String(50), unique=True)
+    name: Mapped[str] = mapped_column(String(250), unique=True)
 
     subject_teachers: Mapped[list["SubjectTeacher"]] = relationship(
         "SubjectTeacher",

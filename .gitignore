@@ -17,3 +17,5 @@ static/
 
 .env
 app/.env
+
+data/

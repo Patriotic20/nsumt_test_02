@@ -22,7 +22,7 @@ services:
   #     - ./logs:/app/logs
   #     - ./app/static:/app/app/static
   #     - ~/.logfire:/root/.logfire:ro
-      
+
   #     # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
   #     # - /app/.venv 
   #   networks:
@@ -72,6 +72,20 @@ services:
       timeout: 3s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - backend_network
+
 networks:
   backend_network:
     driver: bridge
@@ -79,3 +93,4 @@ networks:
 volumes:
   postgres_data_quiz:
   redis_data:
+  pgadmin_data:
