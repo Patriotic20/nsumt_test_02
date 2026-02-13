@@ -10,6 +10,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8000:8000"
     healthcheck:
@@ -22,7 +24,6 @@ services:
       - ./logs:/app/logs
       - ./app/static:/app/app/static
       - ~/.logfire:/root/.logfire:ro
-
       # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
       # - /app/.venv 
     networks:
@@ -37,7 +38,7 @@ services:
     image: postgres:17
     container_name: database
     restart: always
-    env_file: .env 
+    env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
