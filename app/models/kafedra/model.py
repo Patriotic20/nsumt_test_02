@@ -14,7 +14,7 @@ class Kafedra(Base, IdIntPk, TimestampMixin):
     __tablename__ = "kafedras"
 
     faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"))
-    name: Mapped[str] = mapped_column(String(50), unique=True)
+    name: Mapped[str] = mapped_column(String(255), unique=True)
 
 
     faculty: Mapped["Faculty"] = relationship(

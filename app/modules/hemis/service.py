@@ -150,10 +150,20 @@ class HemisLoginService:
         semester_val = self._extract_name(me_data.get("semester"))
         specialty_val = self._extract_name(me_data.get("specialty"))
         
+        # Extract name parts
+        full_name = me_data.get("full_name", "")
+        name_parts = full_name.split()
+        last_name = name_parts[0] if len(name_parts) > 0 else ""
+        first_name = name_parts[1] if len(name_parts) > 1 else ""
+        third_name = " ".join(name_parts[2:]) if len(name_parts) > 2 else ""
+        
         if not student:
             student = Student(
                 user_id=user.id,
-                full_name=me_data.get("full_name", ""),
+                full_name=full_name,
+                first_name=first_name,
+                last_name=last_name,
+                third_name=third_name,
                 student_id_number=me_data.get("student_id_number", ""),
                 image_path=me_data.get("image", ""),
                 birth_date=birth_date,
@@ -176,7 +186,10 @@ class HemisLoginService:
             session.add(student)
         else:
             # Update existing student
-            student.full_name = me_data.get("full_name", "")
+            student.full_name = full_name
+            student.first_name = first_name
+            student.last_name = last_name
+            student.third_name = third_name
             student.student_id_number = me_data.get("student_id_number", "")
             student.image_path = me_data.get("image", "")
             student.birth_date = birth_date

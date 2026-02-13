@@ -19,3 +19,4 @@ static/
 app/.env
 
 data/
+*_backup.sql

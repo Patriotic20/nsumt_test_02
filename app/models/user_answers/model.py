@@ -16,7 +16,7 @@ class UserAnswers(Base, IdIntPk, TimestampMixin):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     quiz_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizzes.id", ondelete="SET NULL"), nullable=True)
     question_id: Mapped[int] = mapped_column(Integer, ForeignKey("questions.id", ondelete="SET NULL"), nullable=True)
-    answer: Mapped[str] = mapped_column(String(255), nullable=True)
+    answer: Mapped[str] = mapped_column(String, nullable=True)
     is_correct: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship("User", back_populates="user_answers")
