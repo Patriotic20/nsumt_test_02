@@ -23,7 +23,7 @@ router = APIRouter(
     "/", 
     response_model=PermissionCreateResponse, 
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(RateLimiter(times=5, seconds=60))]
+    dependencies=[Depends(RateLimiter(5, 60))]
 )
 async def create_permission(
     data: PermissionCreateRequest,
@@ -57,7 +57,7 @@ async def list_permissions(
     )
 
 
-@router.put("/{permission_id}", response_model=PermissionCreateResponse, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+@router.put("/{permission_id}", response_model=PermissionCreateResponse, dependencies=[Depends(RateLimiter(5, 60))])
 async def update_permission(
     permission_id: int,
     data: PermissionCreateRequest,
@@ -69,7 +69,7 @@ async def update_permission(
     )
 
 
-@router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+@router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(5, 60))])
 async def delete_permission(
     permission_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
