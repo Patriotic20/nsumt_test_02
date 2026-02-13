@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 
+# Navigate to the directory where alembic.ini is located
+cd /face/app
 
-# Если ваши миграции (папка alembic) лежат в подпапке /app/app
-# то может потребоваться переход: cd /app
-
-cd /app/app
 echo "Running migrations..."
-alembic upgrade head
+# Use 'uv run' to execute alembic within the virtual environment
+uv run alembic upgrade head
 
-# Выполняем команду, переданную в CMD (запуск python)
-exec "$@"
+echo "Migrations completed. Starting application..."
+
+# Execute the CMD (also using uv run to ensure the app sees the packages)
+exec uv run "$@"

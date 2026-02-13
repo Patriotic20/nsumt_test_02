@@ -20,9 +20,9 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - .:/app
-      - ./logs:/app/logs
-      - ./app/static:/app/app/static
+      - .:/face
+      - ./logs:/face/logs
+      - ./face/static:/face/app/static
       - ~/.logfire:/root/.logfire:ro
       # Если uv создает какие-то локальные папки в /app, которые не нужны на хосте:
       # - /app/.venv 

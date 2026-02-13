@@ -11,20 +11,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /face
+
 
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml uv.lock ./
-RUN uv pip install --system --no-cache -r pyproject.toml
-
+RUN uv sync
 # Копируем всё
 COPY . .
 
-# Исправляем права доступа (на случай работы БЕЗ volume)
-RUN chmod +x /app/entrypoint.sh
+
+RUN chmod +x /face/entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
-CMD ["python", "/app/app/main.py"]
+ENTRYPOINT ["/bin/sh", "/face/entrypoint.sh"]
+CMD ["python", "/face/app/main.py"]
