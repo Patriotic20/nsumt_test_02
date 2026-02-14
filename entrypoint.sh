@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-# Navigate to the directory where alembic.ini is located
-cd /face/app
+# Run from /face, no cd needed
 
 echo "Running migrations..."
 # Use 'uv run' to execute alembic within the virtual environment
-uv run alembic upgrade head
+# Pointing to app/alembic.ini
+uv run alembic -c app/alembic.ini upgrade head
 
 echo "Migrations completed. Starting application..."
 

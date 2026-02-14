@@ -6,8 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .schemas import (
     QuizCreateRequest,
     QuizListRequest,
+    QuizListRequest,
     QuizListResponse,
 )
+from core.config import settings
 
 
 class QuizRepository:
@@ -127,6 +129,27 @@ class QuizRepository:
 
         await session.delete(quiz)
         await session.commit()
+
+
+    async def upload_image(self, file) -> str:
+        import shutil
+        import uuid
+        import os
+
+        # Generate unique filename
+        file_ext = file.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{file_ext}"
+        
+        # Use config for upload dir
+        # Ensure dir exists (though ideally create on startup or here)
+        os.makedirs(settings.file_url.upload_dir, exist_ok=True)
+        file_path = f"{settings.file_url.upload_dir}/{filename}"
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Use config for http url
+        return f"{settings.file_url.http}/{filename}"
 
 
 get_quiz_repository = QuizRepository()

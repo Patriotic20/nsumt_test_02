@@ -1,6 +1,6 @@
 from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
@@ -78,3 +78,12 @@ async def delete_quiz(
     await get_quiz_repository.delete_quiz(
         session=session, quiz_id=quiz_id
     )
+
+
+@router.post("/upload", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+async def upload_image(
+    file: UploadFile = File(...),
+    _: PermissionRequired = Depends(PermissionRequired("create:quiz")),
+):
+    url = await get_quiz_repository.upload_image(file=file)
+    return {"url": url}

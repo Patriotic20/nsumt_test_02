@@ -23,9 +23,10 @@ logfire.instrument_fastapi(app)
 
 authentication_backend = AdminAuth(secret_key=settings.admin.secret_key)
 
-# Ensure static directory exists
-os.makedirs("app/static/images", exist_ok=True)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Ensure upload directory exists
+os.makedirs(settings.file_url.upload_dir, exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 app.add_middleware(
