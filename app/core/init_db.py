@@ -116,11 +116,13 @@ async def init_db(app: FastAPI, session: AsyncSession):
         # Admin gets ALL permissions
         admin_perms = discovered_permissions
 
-        # Teacher gets questions, quizzes, statistics, results
+        # Teacher gets questions, quizzes, statistics, results, subjects
         teacher_perms = {
             p for p in discovered_permissions
-            if any(keyword in p for keyword in ("question", "quiz", "statistics", "result", "teacher"))
+            if any(keyword in p for keyword in ("question", "quiz", "statistics", "result", "teacher", "subject"))
         }
+        if "read:role" in discovered_permissions:
+            teacher_perms.add("read:role")
 
         # Student gets read-only quiz/result + quiz process
         student_perms = {

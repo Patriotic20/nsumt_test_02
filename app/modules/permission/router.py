@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_permission_repository
@@ -12,6 +12,7 @@ from .schemas import (
     PermissionListRequest,
     PermissionListResponse,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["Permission"],
@@ -30,11 +31,13 @@ async def create_permission(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("create:permission")),
 ):
-    return await get_permission_repository.create_permission(session=session, data=data)
+    result = await get_permission_repository.create_permission(session=session, data=data)
+    # await clear_cache(list_permissions)
+    return result
 
 
 @router.get("/{permission_id}", response_model=PermissionCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_permission(
     permission_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -46,7 +49,7 @@ async def get_permission(
 
 
 @router.get("/", response_model=PermissionListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_permissions(
     data: PermissionListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -64,9 +67,12 @@ async def update_permission(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:permission")),
 ):
-    return await get_permission_repository.update_permission(
+    result = await get_permission_repository.update_permission(
         session=session, permission_id=permission_id, data=data
     )
+    # await clear_cache(list_permissions)
+    # await clear_cache(get_permission, permission_id=permission_id)
+    return result
 
 
 @router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(5, 60))])
@@ -78,3 +84,5 @@ async def delete_permission(
     await get_permission_repository.delete_permission(
         session=session, permission_id=permission_id
     )
+    # await clear_cache(list_permissions)
+    # await clear_cache(get_permission, permission_id=permission_id)

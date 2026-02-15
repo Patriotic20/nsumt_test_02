@@ -11,6 +11,8 @@ from .schemas import (
     EndQuizRequest,
     EndQuizResponse,
 )
+# from app.core.cache import clear_cache
+from app.modules.result.router import list_results
 
 # Note: Permissions might be needed but usually taking a quiz is open to students?
 # For now, keeping it open or simple. If auth is needed, Dependencies can be added.
@@ -46,4 +48,7 @@ async def end_quiz(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("quiz_process:end_quiz")),
 ):
-    return await get_quiz_process_repository.end_quiz(session=session, data=data)
+    result = await get_quiz_process_repository.end_quiz(session=session, data=data)
+    # Invalidate result list cache as a new result is created
+    # await clear_cache(list_results)
+    return result

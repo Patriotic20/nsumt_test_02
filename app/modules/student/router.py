@@ -3,7 +3,7 @@ from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 
 from .repository import student_repository
 from .schemas import (
@@ -13,6 +13,7 @@ from .schemas import (
     StudentResponse,
     StudentUpdateRequest,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(prefix="/students", tags=["Students"])
 
@@ -32,7 +33,7 @@ router = APIRouter(prefix="/students", tags=["Students"])
 
 
 @router.get("/{student_id}", response_model=StudentResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_student(
     student_id: int, 
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -42,7 +43,7 @@ async def get_student(
 
 
 @router.get("/", response_model=StudentListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_students(
     data: StudentListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -58,7 +59,10 @@ async def update_student(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:student")),
 ):
-    return await student_repository.update_student(session, student_id, data)
+    result = await student_repository.update_student(session, student_id, data)
+    # await clear_cache(list_students)
+    # await clear_cache(get_student, student_id=student_id)
+    return result
 
 
 @router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -68,3 +72,5 @@ async def delete_student(
     _: PermissionRequired = Depends(PermissionRequired("delete:student")),
 ):
     await student_repository.delete_student(session, student_id)
+    # await clear_cache(list_students)
+    # await clear_cache(get_student, student_id=student_id)

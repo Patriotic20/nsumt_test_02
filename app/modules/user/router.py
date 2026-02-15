@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_user_repository
@@ -16,6 +16,7 @@ from .schemas import (
     UserUpdateRequest,
 )
 from .service import auth_service
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["User"],
@@ -39,7 +40,7 @@ async def refresh(
 
 
 @router.get("/me", response_model=UserCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_me(
     authorization: str = Header(...),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -58,11 +59,13 @@ async def create_user(
     # Используем Depends для инъекции сессии
     session: AsyncSession = Depends(db_helper.session_getter),
 ):
-    return await get_user_repository.create_user(session=session, data=data)
+    result = await get_user_repository.create_user(session=session, data=data)
+    # await clear_cache(list_users)
+    return result
 
 
 @router.get("/{user_id}", response_model=UserCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_user(
     user_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -72,7 +75,7 @@ async def get_user(
 
 
 @router.get("/", response_model=UserListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_users(
     # Используем Depends, чтобы параметры шли из Query string (?page=1&limit=10)
     data: UserListRequest = Depends(),
@@ -89,9 +92,12 @@ async def update_user(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:user")),
 ):
-    return await get_user_repository.update_user(
+    result = await get_user_repository.update_user(
         session=session, user_id=user_id, data=data
     )
+    # await clear_cache(list_users)
+    # await clear_cache(get_user, user_id=user_id)
+    return result
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -101,3 +107,5 @@ async def delete_user(
     _: PermissionRequired = Depends(PermissionRequired("delete:user")),
 ):
     await get_user_repository.delete_user(session=session, user_id=user_id)
+    # await clear_cache(list_users)
+    # await clear_cache(get_user, user_id=user_id)

@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_question_repository
@@ -12,6 +12,7 @@ from .schemas import (
     QuestionListRequest,
     QuestionListResponse,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["Question"],
@@ -30,11 +31,13 @@ async def create_question(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("create:question")),
 ):
-    return await get_question_repository.create_question(session=session, data=data)
+    result = await get_question_repository.create_question(session=session, data=data)
+    # await clear_cache(list_questions)
+    return result
 
 
 @router.get("/{question_id}", response_model=QuestionCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_question(
     question_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -46,7 +49,7 @@ async def get_question(
 
 
 @router.get("/", response_model=QuestionListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_questions(
     data: QuestionListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -64,9 +67,12 @@ async def update_question(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:question")),
 ):
-    return await get_question_repository.update_question(
+    result = await get_question_repository.update_question(
         session=session, question_id=question_id, data=data
     )
+    # await clear_cache(list_questions)
+    # await clear_cache(get_question, question_id=question_id)
+    return result
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -78,6 +84,8 @@ async def delete_question(
     await get_question_repository.delete_question(
         session=session, question_id=question_id
     )
+    # await clear_cache(list_questions)
+    # await clear_cache(get_question, question_id=question_id)
 
 
 @router.post("/upload_image", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -96,6 +104,8 @@ async def upload_questions_excel(
     session: AsyncSession = Depends(db_helper.session_getter),
     current_user: PermissionRequired = Depends(PermissionRequired("create:question")),
 ):
-    return await get_question_repository.upload_questions_excel(
+    result = await get_question_repository.upload_questions_excel(
         session=session, file=file, subject_id=subject_id, user_id=current_user.id
     )
+    # await clear_cache(list_questions)
+    return result

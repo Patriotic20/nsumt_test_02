@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_group_repository
@@ -12,6 +12,7 @@ from .schemas import (
     GroupListRequest,
     GroupListResponse,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["Group"],
@@ -30,11 +31,13 @@ async def create_group(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("create:group")),
 ):
-    return await get_group_repository.create_group(session=session, data=data)
+    result = await get_group_repository.create_group(session=session, data=data)
+    # await clear_cache(list_groups)
+    return result
 
 
 @router.get("/{group_id}", response_model=GroupCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_group(
     group_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -46,7 +49,7 @@ async def get_group(
 
 
 @router.get("/", response_model=GroupListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_groups(
     data: GroupListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -64,9 +67,12 @@ async def update_group(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:group")),
 ):
-    return await get_group_repository.update_group(
+    result = await get_group_repository.update_group(
         session=session, group_id=group_id, data=data
     )
+    # await clear_cache(list_groups)
+    # await clear_cache(get_group, group_id=group_id)
+    return result
 
 
 @router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -78,3 +84,5 @@ async def delete_group(
     await get_group_repository.delete_group(
         session=session, group_id=group_id
     )
+    # await clear_cache(list_groups)
+    # await clear_cache(get_group, group_id=group_id)

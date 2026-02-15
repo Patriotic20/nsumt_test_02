@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_result_repository
@@ -11,6 +11,7 @@ from .schemas import (
     ResultListRequest,
     ResultListResponse,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["Result"],
@@ -19,7 +20,7 @@ router = APIRouter(
 
 
 @router.get("/{result_id}", response_model=ResultResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_result(
     result_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -31,7 +32,7 @@ async def get_result(
 
 
 @router.get("/", response_model=ResultListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_results(
     data: ResultListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -51,3 +52,5 @@ async def delete_result(
     await get_result_repository.delete_result(
         session=session, result_id=result_id
     )
+    # await clear_cache(list_results)
+    # await clear_cache(get_result, result_id=result_id)

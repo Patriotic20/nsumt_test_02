@@ -2,7 +2,7 @@ from core.db_helper import db_helper
 from dependence.role_checker import PermissionRequired
 from fastapi import APIRouter, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_quiz_repository
@@ -12,6 +12,7 @@ from .schemas import (
     QuizListRequest,
     QuizListResponse,
 )
+# from app.core.cache import clear_cache, custom_key_builder
 
 router = APIRouter(
     tags=["Quiz"],
@@ -30,11 +31,13 @@ async def create_quiz(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("create:quiz")),
 ):
-    return await get_quiz_repository.create_quiz(session=session, data=data)
+    result = await get_quiz_repository.create_quiz(session=session, data=data)
+    # await clear_cache(list_quizzes)
+    return result
 
 
 @router.get("/{quiz_id}", response_model=QuizCreateResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def get_quiz(
     quiz_id: int,
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -46,7 +49,7 @@ async def get_quiz(
 
 
 @router.get("/", response_model=QuizListResponse)
-@cache(expire=60)
+# @cache(expire=60, key_builder=custom_key_builder)
 async def list_quizzes(
     data: QuizListRequest = Depends(),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -64,9 +67,12 @@ async def update_quiz(
     session: AsyncSession = Depends(db_helper.session_getter),
     _: PermissionRequired = Depends(PermissionRequired("update:quiz")),
 ):
-    return await get_quiz_repository.update_quiz(
+    result = await get_quiz_repository.update_quiz(
         session=session, quiz_id=quiz_id, data=data
     )
+    # await clear_cache(list_quizzes)
+    # await clear_cache(get_quiz, quiz_id=quiz_id)
+    return result
 
 
 @router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
@@ -78,6 +84,8 @@ async def delete_quiz(
     await get_quiz_repository.delete_quiz(
         session=session, quiz_id=quiz_id
     )
+    # await clear_cache(list_quizzes)
+    # await clear_cache(get_quiz, quiz_id=quiz_id)
 
 
 @router.post("/upload", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
