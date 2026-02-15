@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.subject.model import Subject
+from app.models.subject.model import Subject
 
 
 class SubjectView(ModelView, model=Subject):

@@ -4,7 +4,7 @@ import jwt
 from core.config import settings
 from core.utils.password_hash import verify_password
 from fastapi import HTTPException, status
-from models.user.model import User
+from app.models.user.model import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

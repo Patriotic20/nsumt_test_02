@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.quiz.model import Quiz  
+from app.models.quiz.model import Quiz  
 
 
 class QuizView(ModelView, model=Quiz):

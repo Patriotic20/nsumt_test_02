@@ -1,5 +1,5 @@
 from markupsafe import Markup
-from models.student.model import Student
+from app.models.student.model import Student
 from sqladmin import ModelView
 
 

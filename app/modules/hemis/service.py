@@ -9,11 +9,11 @@ from fastapi import HTTPException, status
 
 from core.config import settings
 from core.utils.password_hash import hash_password, verify_password
-from models.user.model import User
-from models.student.model import Student
-from models.group.model import Group
-from models.faculty.model import Faculty
-from models.role.model import Role
+from app.models.user.model import User
+from app.models.student.model import Student
+from app.models.group.model import Group
+from app.models.faculty.model import Faculty
+from app.models.role.model import Role
 from modules.user.service import auth_service
 from .schemas import HemisLoginRequest, HemisLoginResponse
 

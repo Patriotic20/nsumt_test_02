@@ -1,17 +1,18 @@
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
+
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.faculty.model import Faculty
-    from models.student.model import Student
-    from models.quiz.model import Quiz
-    from models.results.model import Result
-    from models.group_teachers.model import GroupTeacher
+    from app.models.faculty.model import Faculty
+    from app.models.student.model import Student
+    from app.models.quiz.model import Quiz
+    from app.models.results.model import Result
+    from app.models.group_teachers.model import GroupTeacher
 
 
 class Group(Base, IdIntPk, TimestampMixin):

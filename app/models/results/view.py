@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.results.model import Result
+from app.models.results.model import Result
 
 
 class ResultView(ModelView, model=Result):

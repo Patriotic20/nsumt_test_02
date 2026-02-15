@@ -4,7 +4,9 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
-from models import Role, Permission, RolePermission
+from app.models.role.model import Role
+from app.models.permission.model import Permission
+from app.models.role_permission.model import RolePermission
 from dependence.role_checker import PermissionRequired
 import inspect
 

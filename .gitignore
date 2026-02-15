@@ -20,3 +20,6 @@ app/.env
 
 data/
 *_backup.sql
+
+uploads
+uploads/*

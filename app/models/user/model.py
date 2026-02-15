@@ -1,19 +1,19 @@
 from typing import TYPE_CHECKING
 
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from models.role.model import Role
-    from models.student.model import Student
-    from models.question.model import Question
-    from models.quiz.model import Quiz
-    from models.results.model import Result
-    from models.teacher.model import Teacher
-    from models.user_answers.model import UserAnswers
+    from app.models.role.model import Role
+    from app.models.student.model import Student
+    from app.models.question.model import Question
+    from app.models.quiz.model import Quiz
+    from app.models.results.model import Result
+    from app.models.teacher.model import Teacher
+    from app.models.user_answers.model import UserAnswers
 
 
 class User(Base, IdIntPk, TimestampMixin):

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
-from models.results.model import Result
-from models.quiz.model import Quiz
-from models.user.model import User
+from app.models.results.model import Result
+from app.models.quiz.model import Quiz
+from app.models.user.model import User
 from sqlalchemy import func, select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional

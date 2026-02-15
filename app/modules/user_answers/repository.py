@@ -1,6 +1,6 @@
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.user_answers.model import UserAnswers
+from app.models.user_answers.model import UserAnswers
 from .schemas import UserAnswersListRequest
 
 class UserAnswersRepository:

@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.kafedra.model import Kafedra
+from app.models.kafedra.model import Kafedra
 
 
 class KafedraView(ModelView, model=Kafedra):

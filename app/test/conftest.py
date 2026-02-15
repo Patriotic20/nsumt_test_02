@@ -7,7 +7,7 @@ from fastapi_limiter import FastAPILimiter
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from main import app
-from models.base import Base
+from app.models.base import Base
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -95,7 +95,7 @@ async def async_client(async_db):
 
 @pytest_asyncio.fixture
 async def test_role(async_db):
-    from models.role.model import Role
+    from app.models.role.model import Role
 
     role = Role(name="Admin")
     async_db.add(role)
@@ -155,7 +155,7 @@ async def create_permission(async_client, access_token):
 @pytest_asyncio.fixture
 async def test_subject(async_db):
     """Create a subject directly in DB since there is no API for it"""
-    from models.subject.model import Subject
+    from app.models.subject.model import Subject
     subject = Subject(name="Mathematics")
     async_db.add(subject)
     await async_db.commit()

@@ -37,7 +37,7 @@ async def test_start_quiz(auth_client, test_subject, test_group, async_db):
         questions.append(q_resp.json()["id"])
 
     # 3. Manually link questions to quiz (since no API for it)
-    from models.quiz_questions.model import QuizQuestion
+    from app.models.quiz_questions.model import QuizQuestion
     for q_id in questions:
         qq = QuizQuestion(quiz_id=quiz_id, question_id=q_id)
         async_db.add(qq)

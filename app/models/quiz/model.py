@@ -1,17 +1,17 @@
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.subject.model import Subject
-    from models.user.model import User
-    from models.group.model import Group
-    from models.quiz_questions.model import QuizQuestion
-    from models.results.model import Result
-    from models.user_answers.model import UserAnswers
+    from app.models.subject.model import Subject
+    from app.models.user.model import User
+    from app.models.group.model import Group
+    from app.models.quiz_questions.model import QuizQuestion
+    from app.models.results.model import Result
+    from app.models.user_answers.model import UserAnswers
 
 
 class Quiz(Base, IdIntPk, TimestampMixin):

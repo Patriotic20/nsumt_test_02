@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.teacher.model import Teacher
+from app.models.teacher.model import Teacher
 
 
 class TeacherView(ModelView, model=Teacher):

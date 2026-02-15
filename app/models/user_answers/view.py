@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.user_answers.model import UserAnswers
+from app.models.user_answers.model import UserAnswers
 
 class UserAnswersView(ModelView, model=UserAnswers):
     column_list = [

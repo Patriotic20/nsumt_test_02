@@ -1,6 +1,6 @@
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
 
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
@@ -9,8 +9,8 @@ from sqlalchemy.orm import relationship
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.kafedra.model import Kafedra
-    from models.group.model import Group
+    from app.models.kafedra.model import Kafedra
+    from app.models.group.model import Group
 
 class Faculty(Base, IdIntPk, TimestampMixin):
     __tablename__ = "faculties"

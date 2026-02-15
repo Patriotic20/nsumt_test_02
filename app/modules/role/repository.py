@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.role.model import Role
+from app.models.role.model import Role
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

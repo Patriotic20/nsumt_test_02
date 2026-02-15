@@ -1,13 +1,13 @@
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.group.model import Group
-    from models.teacher.model import Teacher
+    from app.models.group.model import Group
+    from app.models.teacher.model import Teacher
 
 
 class GroupTeacher(Base, IdIntPk, TimestampMixin):

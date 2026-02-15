@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.group.model import Group
+from app.models.group.model import Group
 
 
 class GroupView(ModelView, model=Group):

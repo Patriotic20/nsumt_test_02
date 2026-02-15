@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
-from models.role.model import Role
-from models.user.model import User
+from app.models.role.model import Role
+from app.models.user.model import User
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

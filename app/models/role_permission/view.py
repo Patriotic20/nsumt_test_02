@@ -1,4 +1,4 @@
-from models.role_permission.model import RolePermission
+from app.models.role_permission.model import RolePermission
 from sqladmin import ModelView
 
 

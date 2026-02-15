@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.permission.model import Permission
+from app.models.permission.model import Permission
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

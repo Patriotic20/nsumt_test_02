@@ -3,11 +3,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models.quiz.model import Quiz
-from models.question.model import Question
-from models.results.model import Result
-from models.quiz_questions.model import QuizQuestion
-from models.user_answers.model import UserAnswers
+from app.models.quiz.model import Quiz
+from app.models.question.model import Question
+from app.models.results.model import Result
+from app.models.quiz_questions.model import QuizQuestion
+from app.models.user_answers.model import UserAnswers
 
 from .schemas import (
     StartQuizRequest,

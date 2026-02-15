@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.faculty.model import Faculty
+from app.models.faculty.model import Faculty
 
 class FacultyView(ModelView, model=Faculty):
     column_list = (

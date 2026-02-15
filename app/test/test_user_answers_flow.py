@@ -1,11 +1,11 @@
 import pytest
 from sqlalchemy import select
-from models.subject.model import Subject
-from models.quiz.model import Quiz
-from models.question.model import Question
-from models.quiz_questions.model import QuizQuestion
-from models.user_answers.model import UserAnswers
-from models.user.model import User
+from app.models.subject.model import Subject
+from app.models.quiz.model import Quiz
+from app.models.question.model import Question
+from app.models.quiz_questions.model import QuizQuestion
+from app.models.user_answers.model import UserAnswers
+from app.models.user.model import User
 
 @pytest.mark.asyncio
 async def test_user_answers_flow(auth_client, async_db):

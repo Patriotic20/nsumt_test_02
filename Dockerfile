@@ -14,18 +14,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /face
 
-
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock ./
-RUN uv sync
-# Копируем всё
+# COPY EVERYTHING FIRST
 COPY . .
 
+# Now it can build correctly
+RUN uv sync --no-dev
 
 RUN chmod +x /face/entrypoint.sh
 
 EXPOSE 8000
 
 ENTRYPOINT ["/bin/sh", "/face/entrypoint.sh"]
-CMD ["python", "app/main.py"]
+CMD ["uv", "run", "app/main.py"]

@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.quiz_questions.model import QuizQuestion
+from app.models.quiz_questions.model import QuizQuestion
 
 
 class QuizQuestionView(ModelView, model=QuizQuestion):
@@ -7,7 +7,7 @@ class QuizQuestionView(ModelView, model=QuizQuestion):
         "id",
         "quiz_id",
         "question_id",
-    )
+    )   
     column_labels = {
         "id": "ID",
         "quiz_id": "Quiz ID",

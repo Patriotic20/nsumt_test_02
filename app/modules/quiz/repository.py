@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.quiz.model import Quiz
+from app.models.quiz.model import Quiz
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

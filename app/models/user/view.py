@@ -1,4 +1,4 @@
-from models.user.model import User
+from app.models.user.model import User
 from passlib.context import CryptContext
 from sqladmin import ModelView
 

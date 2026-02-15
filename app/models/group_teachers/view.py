@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from models.group_teachers.model import GroupTeacher
+from app.models.group_teachers.model import GroupTeacher
 
 
 class GroupTeacherView(ModelView, model=GroupTeacher):
@@ -9,7 +9,7 @@ class GroupTeacherView(ModelView, model=GroupTeacher):
         GroupTeacher.teacher,
     ]
     
-    column_labels = {
+    column_labels = {   
         "group": "Group",
         "teacher": "Teacher",
     }

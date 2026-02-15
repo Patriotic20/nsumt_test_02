@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.group.model import Group
+from app.models.group.model import Group
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.teacher.model import Teacher
+from app.models.teacher.model import Teacher
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,20 +1,20 @@
 
 import uvicorn
-import core.logging  # Trigger logging/logfire configuration
-from core.config import settings
-from core.db_helper import db_helper
+import app.core.logging  # Trigger logging/logfire configuration
+from app.core.config import settings
+from app.core.db_helper import db_helper
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from middleware.admin_auth import AdminAuth
-from middleware.logging_middleware import LoggingMiddleware
-from models.views import register_models
-from modules.router import router
+from app.middleware.admin_auth import AdminAuth
+from app.middleware.logging_middleware import LoggingMiddleware
+from app.models.views import register_models
+from app.modules.router import router
 from sqladmin import Admin
 import logfire
 
 from fastapi.staticfiles import StaticFiles
 import os
-from lifespan.lifespan import lifespan
+from app.lifespan.lifespan import lifespan
 
 app = FastAPI(lifespan=lifespan)
 

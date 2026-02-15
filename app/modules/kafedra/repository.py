@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from models.kafedra.model import Kafedra
+from app.models.kafedra.model import Kafedra
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

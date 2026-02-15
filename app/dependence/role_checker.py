@@ -4,11 +4,11 @@ from core.db_helper import db_helper
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader
 from jwt import PyJWTError
-from models.permission.model import Permission
-from models.role.model import Role
-from models.role_permission.model import RolePermission
-from models.user.model import User
-from models.user_role.model import UserRole
+from app.models.permission.model import Permission
+from app.models.role.model import Role
+from app.models.role_permission.model import RolePermission
+from app.models.user.model import User
+from app.models.user_role.model import UserRole
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

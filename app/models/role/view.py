@@ -1,4 +1,4 @@
-from models.role.model import Role
+from app.models.role.model import Role
 from sqladmin import ModelView
 
 

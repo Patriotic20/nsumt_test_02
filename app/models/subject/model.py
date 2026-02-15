@@ -1,17 +1,17 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
-from models.mixins.id_int_pk import IdIntPk
-from models.mixins.time_stamp_mixin import TimestampMixin
+from app.models.base import Base
+from app.models.mixins.id_int_pk import IdIntPk
+from app.models.mixins.time_stamp_mixin import TimestampMixin
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.teacher.model import Teacher
-    from models.question.model import Question
-    from models.quiz.model import Quiz
-    from models.subject_teacher.model import SubjectTeacher
-    from models.results.model import Result
+    from app.models.teacher.model import Teacher
+    from app.models.question.model import Question
+    from app.models.quiz.model import Quiz
+    from app.models.subject_teacher.model import SubjectTeacher
+    from app.models.results.model import Result
 
 
 class Subject(Base, IdIntPk, TimestampMixin):
