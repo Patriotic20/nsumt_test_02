@@ -17,6 +17,7 @@ from .schemas import (
     FacultyStatisticsResponse,
     GroupStatisticsResponse,
     TeacherStatisticsResponse,
+    FacultyGroupStat,
 )
 
 
@@ -110,18 +111,53 @@ class StatisticsRepository:
             raise HTTPException(status_code=404, detail="Faculty not found")
 
         # Result -> Group -> Faculty
+        # We need stats per group
         stats_stmt = select(
+            Group.id,
+            Group.name,
             func.count(Result.id).label("total_results"),
             func.avg(Result.grade).label("avg_grade")
-        ).join(Result.group).where(Group.faculty_id == faculty_id)
+        ).outerjoin(Result, Result.group_id == Group.id).where(Group.faculty_id == faculty_id).group_by(Group.id)
         
-        stats = (await session.execute(stats_stmt)).one()
+        group_stats_res = (await session.execute(stats_stmt)).all()
+        
+        groups_data = []
+        total_quizzes = 0
+        total_grade_sum = 0
+        total_groups_with_results = 0
+
+        for g_id, g_name, count, avg in group_stats_res:
+            count = count or 0
+            avg = float(avg or 0.0)
+            
+            groups_data.append(FacultyGroupStat(
+                group_id=g_id,
+                name=g_name,
+                total_quizzes_taken=count,
+                average_grade=avg
+            ))
+            
+            total_quizzes += count
+            if count > 0:
+                total_grade_sum += avg # Sum of averages? Or weighted average?
+                # Usually system average is avg of all results.
+                # Let's recalculate total average from raw results or weighted.
+                # Actually, simpler to just query total stats separately or aggregate here.
+                # If we sum averages and divide by count of groups we get avg of avgs.
+                # If we want true average of all results: 
+                # (avg1 * count1 + avg2 * count2) / total_count
+        
+        # Calculate true faculty average
+        # Re-query or calculate from groups
+        weighted_sum = sum(g.average_grade * g.total_quizzes_taken for g in groups_data)
+        faculty_avg = weighted_sum / total_quizzes if total_quizzes > 0 else 0.0
 
         return FacultyStatisticsResponse(
             faculty_id=faculty.id,
             name=faculty.name,
-            total_quizzes_taken=stats.total_results or 0,
-            average_grade=float(stats.avg_grade or 0.0)
+            total_quizzes_taken=total_quizzes,
+            average_grade=faculty_avg,
+            groups=groups_data
         )
 
     async def get_group_stats(

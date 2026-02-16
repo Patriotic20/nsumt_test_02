@@ -86,3 +86,12 @@ async def test_statistics_endpoints(
     assert data["faculty_id"] == faculty_id
     assert data["total_quizzes_taken"] == 2 # total results
     assert data["average_grade"] == 90.0
+    
+    # Verify Groups breakdown
+    assert "groups" in data
+    assert len(data["groups"]) == 1
+    group_stat = data["groups"][0]
+    assert group_stat["group_id"] == test_group["id"]
+    assert group_stat["name"] == test_group["name"]
+    assert group_stat["total_quizzes_taken"] == 2
+    assert group_stat["average_grade"] == 90.0

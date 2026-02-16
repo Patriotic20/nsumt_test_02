@@ -27,11 +27,21 @@ class UserStatisticsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class FacultyGroupStat(BaseModel):
+    group_id: int
+    name: str
+    total_quizzes_taken: int
+    average_grade: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
 class FacultyStatisticsResponse(BaseModel):
     faculty_id: int
     name: str
     total_quizzes_taken: int
     average_grade: float
+    groups: list[FacultyGroupStat]
     
     model_config = ConfigDict(from_attributes=True)
 
