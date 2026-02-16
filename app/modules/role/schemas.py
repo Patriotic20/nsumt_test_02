@@ -6,6 +6,10 @@ from pydantic import BaseModel, ConfigDict
 class RoleCreateRequest(BaseModel):
     name: str
 
+class RolePermissionAssignRequest(BaseModel):
+    role_id: int
+    permission_ids: list[int]
+
     model_config = ConfigDict(
         str_strip_whitespace=True,
         str_to_lower=True,

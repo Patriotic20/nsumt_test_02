@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.group.model import Group
-    from app.models.teacher.model import Teacher
+    from app.models.user.model import User
 
 
 class GroupTeacher(Base, IdIntPk, TimestampMixin):
@@ -17,10 +17,10 @@ class GroupTeacher(Base, IdIntPk, TimestampMixin):
     )
 
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"))
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("teachers.id"))
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     group: Mapped["Group"] = relationship("Group", back_populates="group_teachers")
-    teacher: Mapped["Teacher"] = relationship("Teacher", back_populates="teacher_groups")
+    teacher: Mapped["User"] = relationship("User", back_populates="group_teachers")
 
     def __str__(self):
         return f"{self.group_id} - {self.teacher_id}"

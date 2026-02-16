@@ -11,6 +11,7 @@ from .schemas import (
     RoleCreateResponse,
     RoleListRequest,
     RoleListResponse,
+    RolePermissionAssignRequest,
 )
 # from app.core.cache import clear_cache, custom_key_builder
 
@@ -78,5 +79,15 @@ async def delete_role(
     _: PermissionRequired = Depends(PermissionRequired("delete:role")),
 ):
     await get_role_repository.delete_role(session=session, role_id=role_id)
+
+
+@router.post("/assign_permission", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+async def assign_permission(
+    data: RolePermissionAssignRequest,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("update:role")), # Assuming update:role is appropriate
+):
+    await get_role_repository.assign_permissions(session=session, data=data)
+    return {"message": "Permissions assigned successfully"}
     # await clear_cache(list_roles)
     # await clear_cache(get_role, role_id=role_id)

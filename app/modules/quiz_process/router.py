@@ -2,6 +2,7 @@ from core.db_helper import db_helper
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from dependence.role_checker import PermissionRequired
+from app.models.user.model import User
 from fastapi_limiter.depends import RateLimiter
 
 from .repository import get_quiz_process_repository
@@ -32,9 +33,9 @@ router = APIRouter(
 async def start_quiz(
     data: StartQuizRequest,
     session: AsyncSession = Depends(db_helper.session_getter),
-    _: PermissionRequired = Depends(PermissionRequired("quiz_process:start_quiz")),
+    current_user: User = Depends(PermissionRequired("quiz_process:start_quiz")),
 ):
-    return await get_quiz_process_repository.start_quiz(session=session, data=data)
+    return await get_quiz_process_repository.start_quiz(session=session, data=data, user=current_user)
 
 
 @router.post(
@@ -46,9 +47,6 @@ async def start_quiz(
 async def end_quiz(
     data: EndQuizRequest,
     session: AsyncSession = Depends(db_helper.session_getter),
-    _: PermissionRequired = Depends(PermissionRequired("quiz_process:end_quiz")),
+    current_user: User = Depends(PermissionRequired("quiz_process:end_quiz")),
 ):
-    result = await get_quiz_process_repository.end_quiz(session=session, data=data)
-    # Invalidate result list cache as a new result is created
-    # await clear_cache(list_results)
-    return result
+    return await get_quiz_process_repository.end_quiz(session=session, data=data, user=current_user)

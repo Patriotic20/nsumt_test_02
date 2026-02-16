@@ -9,7 +9,9 @@ from .schemas import (
     UserCreateRequest,
     UserListRequest,
     UserListResponse,
+    UserListResponse,
     UserUpdateRequest,
+    UserRoleAssignRequest,
 )
 
 
@@ -134,6 +136,52 @@ class UserRepository:
 
         await session.delete(user)
         await session.commit()
+
+
+    async def assign_roles(
+        self, session: AsyncSession, data: UserRoleAssignRequest
+    ) -> None:
+        # 1. Fetch User
+        stmt = select(User).where(User.id == data.user_id).options(selectinload(User.roles))
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+        
+        # 2. Fetch Roles
+        if not data.role_ids:
+            # If empty list provided, remove all roles? 
+            # Or assume explicit clear. Let's allowing clearing.
+            user.roles = []
+        else:
+            stmt_roles = select(Role).where(Role.id.in_(data.role_ids))
+            result_roles = await session.execute(stmt_roles)
+            roles = result_roles.scalars().all()
+            
+            if len(roles) != len(data.role_ids):
+                 # Some roles found, some not. 
+                 # Strict check: all IDs must be valid.
+                 found_ids = {r.id for r in roles}
+                 missing_ids = set(data.role_ids) - found_ids
+                 raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Roles with ids {missing_ids} not found"
+                )
+            
+            # 3. Assign
+            user.roles = list(roles)
+            
+        try:
+            await session.commit()
+        except Exception:
+             await session.rollback()
+             raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error while assigning roles"
+            )
 
 
 get_user_repository = UserRepository()

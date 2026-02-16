@@ -7,7 +7,10 @@ from app.models.quiz.model import Quiz
 from app.models.question.model import Question
 from app.models.results.model import Result
 from app.models.quiz_questions.model import QuizQuestion
+from app.models.quiz_questions.model import QuizQuestion
 from app.models.user_answers.model import UserAnswers
+from app.models.student.model import Student
+from app.models.user.model import User
 
 from .schemas import (
     StartQuizRequest,
@@ -20,7 +23,7 @@ import random
 
 class QuizProcessRepository:
     async def start_quiz(
-        self, session: AsyncSession, data: StartQuizRequest
+        self, session: AsyncSession, data: StartQuizRequest, user: User
     ) -> StartQuizResponse:
         # Fetch quiz with questions
         stmt = (
@@ -45,6 +48,37 @@ class QuizProcessRepository:
              raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Invalid PIN"
             )
+
+        # Check if user is a student and restrict access based on group
+        stmt_student = select(Student).where(Student.user_id == user.id)
+        result_student = await session.execute(stmt_student)
+        student = result_student.scalar_one_or_none()
+
+        if student:
+            # If user is a student, they must have a group and it must match the quiz's group if the quiz has one
+            # Logic: 
+            # 1. If quiz has a group_id, student must belong to that group.
+            # 2. If quiz has NO group_id, looks like it's open to all? Or logic says "show only match group".
+            # The prompt says: "user need show only matcvh group if user id not in student model show all quiz"
+            # This implies:
+            # - If Student: Access ONLY if quiz.group_id == student.group_id
+            # - If Not Student: Access ALL (or at least no group restriction from this logic)
+            
+            # Additional clarification: "quiz have group id and user need show only matcvh group"
+            
+            if quiz.group_id is not None:
+                if student.group_id != quiz.group_id:
+                     raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN, 
+                        detail="This quiz is not available for your group"
+                    )
+            else:
+                 # Boolean: if quiz has no group, can student take it? 
+                 # Usually general quizzes are for everyone.
+                 # But if the requirement "show only match group" is strict, maybe they can't see general ones?
+                 # Assume general quizzes (group_id=None) are open to everyone.
+                 pass
+
 
         # Prepare questions with shuffled options
         question_dtos = []
@@ -90,7 +124,7 @@ class QuizProcessRepository:
         )
 
     async def end_quiz(
-        self, session: AsyncSession, data: EndQuizRequest
+        self, session: AsyncSession, data: EndQuizRequest, user: User
     ) -> EndQuizResponse:
         # Fetch quiz to get subject/group info if needed, or just for verification
         stmt = select(Quiz).where(Quiz.id == data.quiz_id)
@@ -116,6 +150,15 @@ class QuizProcessRepository:
         q_result = await session.execute(q_stmt)
         questions_map = {q.id: q for q in q_result.scalars().all()}
         
+        # Validate that all question IDs exist
+        # If any question_id from answers is not in questions_map, it's invalid
+        for ans in data.answers:
+            if ans.question_id not in questions_map:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid question_id: {ans.question_id}"
+                )
+
         for ans in data.answers:
             question = questions_map.get(ans.question_id)
             is_correct = False
@@ -132,7 +175,7 @@ class QuizProcessRepository:
             
             # Save user answer
             user_answer = UserAnswers(
-                user_id=data.user_id,
+                user_id=user.id,
                 quiz_id=data.quiz_id,
                 question_id=ans.question_id,
                 answer=ans.answer,
@@ -152,7 +195,7 @@ class QuizProcessRepository:
         # Note: Result model expects integer for grade
         
         result = Result(
-            user_id=data.user_id, # Can be None if anonymous
+            user_id=user.id, # Use authenticated user ID
             quiz_id=quiz.id,
             subject_id=quiz.subject_id,
             group_id=quiz.group_id, # This takes group from quiz, but maybe should take from user? 
@@ -166,11 +209,12 @@ class QuizProcessRepository:
         try:
             await session.commit()
             await session.refresh(result)
-        except Exception:
+        except Exception as e:
             await session.rollback()
+            print(f"Error saving result: {e}") # Debug print
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Database error while saving result",
+                detail=f"Database error while saving result: {e}",
             )
 
         return EndQuizResponse(

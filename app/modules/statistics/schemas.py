@@ -25,3 +25,31 @@ class UserStatisticsResponse(BaseModel):
     average_grade: float
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class FacultyStatisticsResponse(BaseModel):
+    faculty_id: int
+    name: str
+    total_quizzes_taken: int
+    average_grade: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GroupStatisticsResponse(BaseModel):
+    group_id: int
+    name: str
+    total_quizzes_taken: int
+    average_grade: float
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TeacherStatisticsResponse(BaseModel):
+    teacher_id: int
+    full_name: str
+    total_quizzes_created: int
+    total_results: int
+    average_grade: float
+    
+    model_config = ConfigDict(from_attributes=True)

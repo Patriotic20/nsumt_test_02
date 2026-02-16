@@ -10,8 +10,6 @@ if TYPE_CHECKING:
     from app.models.kafedra.model import Kafedra
     from app.models.subject.model import Subject
     from app.models.subject_teacher.model import SubjectTeacher
-    from app.models.group_teachers.model import GroupTeacher
-    
     from app.models.user.model import User
 
 class Teacher(Base, IdIntPk, TimestampMixin):
@@ -29,12 +27,6 @@ class Teacher(Base, IdIntPk, TimestampMixin):
     subject_teachers: Mapped[list["SubjectTeacher"]] = relationship(
         "SubjectTeacher",
         back_populates="teacher",
-    )
-
-    teacher_groups: Mapped[list["GroupTeacher"]] = relationship(
-        "GroupTeacher", 
-        back_populates="teacher",
-        cascade="all, delete-orphan"
     )
 
     user: Mapped["User"] = relationship("User", back_populates="teacher")

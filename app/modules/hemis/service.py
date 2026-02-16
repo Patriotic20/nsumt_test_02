@@ -103,13 +103,13 @@ class HemisLoginService:
 
         hashed_pw = hash_password(password)
         
-        student_role_stmt = select(Role).where(Role.name == "student")
+        student_role_stmt = select(Role).where(Role.name == "Student")
         role_res = await session.execute(student_role_stmt)
         student_role = role_res.scalar_one_or_none()
         
         if not student_role:
              # Create role if it doesn't exist (safety fallback)
-             student_role = Role(name="student")
+             student_role = Role(name="Student")
              session.add(student_role)
              await session.flush() # flush to get ID
 

@@ -13,6 +13,7 @@ from .schemas import (
     UserListResponse,
     UserLoginRequest,
     UserLoginResponse,
+    UserRoleAssignRequest,
     UserUpdateRequest,
 )
 from .service import auth_service
@@ -107,5 +108,15 @@ async def delete_user(
     _: PermissionRequired = Depends(PermissionRequired("delete:user")),
 ):
     await get_user_repository.delete_user(session=session, user_id=user_id)
+
+
+@router.post("/assign_role", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+async def assign_role(
+    data: UserRoleAssignRequest,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("create:user")), # Assuming admin permission needed
+):
+    await get_user_repository.assign_roles(session=session, data=data)
+    return {"message": "Roles assigned successfully"}
     # await clear_cache(list_users)
     # await clear_cache(get_user, user_id=user_id)

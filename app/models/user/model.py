@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.results.model import Result
     from app.models.teacher.model import Teacher
     from app.models.user_answers.model import UserAnswers
+    from app.models.group_teachers.model import GroupTeacher
 
 
 class User(Base, IdIntPk, TimestampMixin):
@@ -50,6 +51,12 @@ class User(Base, IdIntPk, TimestampMixin):
     )
 
     teacher: Mapped["Teacher"] = relationship("Teacher", back_populates="user")
+
+    group_teachers: Mapped[list["GroupTeacher"]] = relationship(
+        "GroupTeacher", 
+        back_populates="teacher",
+        cascade="all, delete-orphan"
+    )
 
     def __str__(self):
         return self.username

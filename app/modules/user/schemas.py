@@ -37,6 +37,11 @@ class UserUpdateRequest(BaseModel):
     username: str | None = None
 
 
+class UserRoleAssignRequest(BaseModel):
+    user_id: int
+    role_ids: list[int]
+
+
 class UserCreateResponse(BaseModel):
     id: int
     username: str

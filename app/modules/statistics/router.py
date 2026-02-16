@@ -9,6 +9,9 @@ from .schemas import (
     GeneralStatisticsResponse,
     QuizStatisticsResponse,
     UserStatisticsResponse,
+    FacultyStatisticsResponse,
+    GroupStatisticsResponse,
+    TeacherStatisticsResponse,
 )
 
 router = APIRouter(
@@ -47,4 +50,37 @@ async def get_user_statistics(
 ):
     return await get_statistics_repository.get_user_stats(
         session=session, user_id=user_id
+    )
+
+
+@router.get("/faculty/{faculty_id}", response_model=FacultyStatisticsResponse)
+async def get_faculty_statistics(
+    faculty_id: int,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("read:statistics")),
+):
+    return await get_statistics_repository.get_faculty_stats(
+        session=session, faculty_id=faculty_id
+    )
+
+
+@router.get("/group/{group_id}", response_model=GroupStatisticsResponse)
+async def get_group_statistics(
+    group_id: int,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("read:statistics")),
+):
+    return await get_statistics_repository.get_group_stats(
+        session=session, group_id=group_id
+    )
+
+
+@router.get("/teacher/{teacher_id}", response_model=TeacherStatisticsResponse)
+async def get_teacher_statistics(
+    teacher_id: int,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    _: PermissionRequired = Depends(PermissionRequired("read:statistics")),
+):
+    return await get_statistics_repository.get_teacher_stats(
+        session=session, teacher_id=teacher_id
     )

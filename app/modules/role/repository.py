@@ -1,9 +1,11 @@
 from fastapi import HTTPException, status
 from app.models.role.model import Role
+from app.models.permission.model import Permission
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from .schemas import RoleCreateRequest, RoleListRequest, RoleListResponse
+from .schemas import RoleCreateRequest, RoleListRequest, RoleListResponse, RolePermissionAssignRequest
 
 
 class RoleRepository:
@@ -99,6 +101,47 @@ class RoleRepository:
 
         await session.delete(role)
         await session.commit()
+
+    async def assign_permissions(
+        self, session: AsyncSession, data: RolePermissionAssignRequest
+    ) -> None:
+        # 1. Fetch Role
+        stmt = select(Role).where(Role.id == data.role_id).options(selectinload(Role.permissions))
+        result = await session.execute(stmt)
+        role = result.scalar_one_or_none()
+
+        if not role:
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
+            )
+        
+        # 2. Fetch Permissions
+        if not data.permission_ids:
+            role.permissions = []
+        else:
+            stmt_perms = select(Permission).where(Permission.id.in_(data.permission_ids))
+            result_perms = await session.execute(stmt_perms)
+            permissions = result_perms.scalars().all()
+            
+            if len(permissions) != len(data.permission_ids):
+                 found_ids = {p.id for p in permissions}
+                 missing_ids = set(data.permission_ids) - found_ids
+                 raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Permissions with ids {missing_ids} not found"
+                )
+            
+            # 3. Assign
+            role.permissions = list(permissions)
+            
+        try:
+            await session.commit()
+        except Exception:
+             await session.rollback()
+             raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error while assigning permissions"
+            )
 
 
 get_role_repository = RoleRepository()

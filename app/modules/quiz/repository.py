@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 from app.models.quiz.model import Quiz
+from app.models.question.model import Question
+from app.models.quiz_questions.model import QuizQuestion
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +13,8 @@ from .schemas import (
 )
 from core.config import settings
 
+
+from app.models.group_teachers.model import GroupTeacher
 
 class QuizRepository:
     async def create_quiz(
@@ -27,6 +31,41 @@ class QuizRepository:
             subject_id=data.subject_id,
         )
         session.add(new_quiz)
+
+        # Auto-link questions if user_id and subject_id are provided
+        if data.user_id and data.subject_id:
+            # Find all questions with matching user_id and subject_id
+            stmt_questions = select(Question).where(
+                Question.user_id == data.user_id,
+                Question.subject_id == data.subject_id
+            )
+            result_questions = await session.execute(stmt_questions)
+            questions = result_questions.scalars().all()
+
+            for question in questions:
+                # Create relation
+                quiz_question = QuizQuestion(
+                    quiz=new_quiz,
+                    question=question
+                )
+                session.add(quiz_question)
+        
+        # Auto-create GroupTeacher relation if user_id and group_id are provided
+        if data.user_id and data.group_id:
+            # Check if relation already exists
+            stmt_check = select(GroupTeacher).where(
+                GroupTeacher.teacher_id == data.user_id,
+                GroupTeacher.group_id == data.group_id
+            )
+            result_check = await session.execute(stmt_check)
+            existing_relation = result_check.scalar_one_or_none()
+            
+            if not existing_relation:
+                new_group_teacher = GroupTeacher(
+                    teacher_id=data.user_id,
+                    group_id=data.group_id
+                )
+                session.add(new_group_teacher)
 
         try:
             await session.commit()
@@ -70,6 +109,9 @@ class QuizRepository:
         if request.subject_id:
             stmt = stmt.where(Quiz.subject_id == request.subject_id)
 
+        if request.is_active is not None:
+             stmt = stmt.where(Quiz.is_active == request.is_active)
+
         result = await session.execute(stmt)
         quizzes = result.scalars().all()
 
@@ -82,6 +124,8 @@ class QuizRepository:
             count_stmt = count_stmt.where(Quiz.group_id == request.group_id)
         if request.subject_id:
             count_stmt = count_stmt.where(Quiz.subject_id == request.subject_id)
+        if request.is_active is not None:
+            count_stmt = count_stmt.where(Quiz.is_active == request.is_active)
 
         total_result = await session.execute(count_stmt)
         total = total_result.scalar() or 0

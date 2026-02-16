@@ -42,6 +42,7 @@ class QuizListRequest(BaseModel):
     user_id: Optional[int] = None
     group_id: Optional[int] = None
     subject_id: Optional[int] = None
+    is_active: Optional[bool] = None
     
     page: int = 1 
     
